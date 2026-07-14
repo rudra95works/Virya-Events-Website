@@ -5,9 +5,18 @@ const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
 
+type ChatMessage = {
+  role: "user" | "assistant";
+  content: string;
+};
+
 export async function POST(req: Request) {
   try {
-    const { message } = await req.json();
+    const {
+      messages,
+    }: {
+      messages: ChatMessage[];
+    } = await req.json();
 
     const chatCompletion = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
@@ -149,19 +158,19 @@ IMPORTANT RULES
 • Stay focused on Virya Events and event planning.
 • If the customer asks something unrelated to events, politely redirect the conversation back to Virya Events.
 • Always maintain a premium, trustworthy and professional tone.
-          `,
+`,
         },
-        {
-          role: "user",
-          content: message,
-        },
+
+        ...messages,
       ],
     });
 
+    const reply =
+      chatCompletion.choices[0]?.message?.content?.trim() ||
+      "Sorry, I couldn't generate a response.";
+
     return NextResponse.json({
-      reply:
-        chatCompletion.choices[0]?.message?.content ??
-        "Sorry, I couldn't generate a response.",
+      reply,
     });
   } catch (error) {
     console.error(error);
