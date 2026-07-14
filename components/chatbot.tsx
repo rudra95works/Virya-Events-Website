@@ -266,7 +266,7 @@ export default function ChatBot() {
         <div className="quick-actions-wrapper">
 
           <div className="quick-title">
-            Popular Events
+            Quick Start
           </div>
 
           <div className="quick-actions">

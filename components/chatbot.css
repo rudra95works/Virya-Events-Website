@@ -371,19 +371,12 @@ margin:10px 0;
 ========================================================= */
 
 .quick-actions{
-
     display:flex;
-
     flex-wrap:wrap;
 
-    gap:12px;
+    gap:8px;
 
-    padding:20px;
-
-    background:#ffffff;
-
-    border-top:1px solid #ececec;
-
+    padding:12px 20px 16px;
 }
 
 .quick-actions button{
@@ -394,7 +387,7 @@ margin:10px 0;
 
     gap:6px;
 
-    padding:10px 16px;
+    padding:7px 15px;
 
     background:#ffffff;
 
@@ -445,13 +438,15 @@ border-color:#D4AF37;
 
     display:flex;
 
+    align-items:stretch;
+
     gap:12px;
 
-    padding:20px;
+    padding:14px 20px 16px;
 
     background:#ffffff;
 
-    border-top:1px solid #ececec;
+    border-top:none;
 
 }
 
@@ -459,7 +454,9 @@ border-color:#D4AF37;
 
     flex:1;
 
-    padding:12px 14px;
+    height:46px;
+
+    padding:0 14px;
 
     font-size:15px;
 
@@ -483,35 +480,41 @@ border-color:#D4AF37;
 
 .chat-input input:focus{
 
-border-color:#D4AF37;
+    border-color:#D4AF37;
 
-box-shadow:0 0 0 3px rgba(212,175,55,.18);
+    box-shadow:0 0 0 3px rgba(212,175,55,.18);
 
 }
 
 .chat-input button{
 
-background:#D4AF37;
+    height:46px;
 
-color:#111827;
+    min-width:92px;
 
-border:none;
+    padding:0 18px;
 
-padding:0 22px;
+    background:#D4AF37;
 
-border-radius:12px;
+    color:#111827;
 
-cursor:pointer;
+    border:none;
 
-font-weight:700;
+    border-radius:12px;
 
-transition:.25s;
+    cursor:pointer;
+
+    font-weight:700;
+
+    font-size:16px;
+
+    transition:.25s;
 
 }
 
 .chat-input button:hover{
 
-background:#B68D1D;
+    background:#B68D1D;
 
 }
 
@@ -550,24 +553,20 @@ background:#B68D1D;
 }
 
 .quick-actions-wrapper{
-
-    padding-top:12px;
-
+    padding-top:2px;
     background:#ffffff;
-
     border-top:1px solid #ececec;
-
 }
 
 .quick-title{
-  font-size:12px;
-  font-weight:700;
-  letter-spacing:2px;
-  text-transform:uppercase;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:#B48A18;
 
-  color:#B48A18;
-
-  margin-bottom:12px;
+    margin-bottom:8px;
+    padding-left:20px;
 }
 
 
