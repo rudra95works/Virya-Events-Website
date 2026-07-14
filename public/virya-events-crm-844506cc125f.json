@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "virya-events-crm",
+  "private_key_id": "844506cc125f2e1f617a59390fdd14a3568e1cd7",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDVffvIBIFODsAB\nOHCvof+zOFTOekL9hgiPOXFbKg8RfuWR3dAL86nV3WARAwHKQGoFZlR1KRjJONaw\n9HK1XYI2glJ/14KeVIl5Eo0FoEwggI4z6YB0o1jD2lp6nJIoXw/+Jj4ObP2Xw+8M\nxPZbDhHrTo+cyAHhUFxBgNE0/FlRY437FQ66Rp1mml3p6vB+3qnT2Z+H/9kxmTj5\nQjAFeRllW4UzTGPjcAB+Y99czGz427NZdOOD7p41FPUiTF97JT9hqO2IcbL4Kp4U\ngA2/FnXqA9wyTspFqgyd8geUXPBiPR3jEbY6qxUD/TCjJz8GOCYn1D6Vfs+76tnn\nEebK1j5pAgMBAAECggEAGw1Ss9P2T94d8Emm5b/A9y8NIqNqt6tIjGAlVVLtWTSG\nLHHkjznPQcftCLAj2u1HQes8ingBqbBnwUEdro5BwLHKIw7mKzU1EkAKhIr8+nqv\ntN5CplpIa3t7TuFmF8gr7kgJlv8H3IzkTpmVSeZs2Nnkkrjj8W6jB13Q+fDRSeGj\nTRuzPyxG/dpsFC7ZHoYcxXq9cxnf81a9cjIRV5dvEMTHU7ZcADGqsGFaUuf0607H\nGv+S4uhpPV0YkngWAwrlUZ4/t75ga1DcJJNZwQLON786QTRYLoV16dSEqUOLVydZ\nmlbWAWJeMm7GjzrQE260HZS2cfdUPzW53biXWkxELQKBgQDsFkzJFj0NgxcUnQWm\naj+mH1C5nRadXYqgepzlGHmIt4HQc49TUBAzWzw1MLjfI92BBeCv48Vf9o0jZoDs\n9XAE9n3a7AImGlZTr9bj6g1NdJsdBAhzaO/GFJVskkS55HEccpEI9r3XD8+sDbq/\nsLQRgvc0d58zEPHnXPMBKoUOMwKBgQDnf81oxGkPVb74VEvkz8652wr16V63AfAC\n6ZcYdjUHvPNHiyrJsm1zfXpCmEV/5nNWeSWOS1s66/7drVjmHuGZGqvGyVaA0pGW\nNwLMiaVVDxcIriNb5scwZMRIdZ5dZPrup5kXeANo0fXatwY74FvIY5t9WUOZTSUz\n6RCchIMs8wKBgQC8rEmrPqmGHeiZIa/9QdYiFc62t/L1ymbaP4MZl4ixGS6Wf3Pg\nehCoalZgj9J/CbOgxCi/iIEZYvmCfA220aM3ZCJKjehduRiaguFyfX8qEnFQLAPw\n78EHhTWxceeYxBcdS/Xauw4WTF2EO+it/zK49/hFpv/EmNsqMl9F5Ew3fwKBgCgc\nGZ/sX/ObPLJUEK49XykOjbCb1aBJwqcOh/JiEMAded1MfIZj1tjqxbMiJPCLIjK6\nXMpxvgXQe+E2tq9wbFAVseuIWOeLFFR9hYug0beSHMCRQ2kZ7CszWlrfnie6ZkvR\nWBIb5iNUNY/GpFrdfamTsI4gWDkIh8iduhYUU5IHAoGBAIfIkxb9UKYP3CK1nEAQ\n1BnS4OzmhbVVYb9mRbmm7de205e72OA2UBPMOhrgX3F14AeI4voFMN7YVBn8PJaL\nNfCz5tIpLkw74V63VeGRb1dAVqePEX2LNLKHVQEtTM+N8drknupyWCnnXcRaMbyu\nNiRYQXW+ZKe9kOtn7QRmuZ2S\n-----END PRIVATE KEY-----\n",
+  "client_email": "virya-chatbot@virya-events-crm.iam.gserviceaccount.com",
+  "client_id": "108683327086011986726",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/virya-chatbot%40virya-events-crm.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

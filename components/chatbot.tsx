@@ -8,6 +8,19 @@ type Message = {
   content: string;
 };
 
+type Lead = {
+  name: string;
+  phone: string;
+  email: string;
+  eventType: string;
+  eventDate: string;
+  guests: string;
+  venue: string;
+  budget: string;
+  services: string[];
+  requirements: string;
+};
+
 export default function ChatBot() {
 
   const [message, setMessage] = useState("");
@@ -22,6 +35,19 @@ export default function ChatBot() {
 
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+
+  const [lead, setLead] = useState<Lead>({
+  name: "",
+  phone: "",
+  email: "",
+  eventType: "",
+  eventDate: "",
+  guests: "",
+  venue: "",
+  budget: "",
+  services: [],
+  requirements: "",
+});
 
   const [showPrompt, setShowPrompt] = useState(false);
 const [promptDismissed, setPromptDismissed] = useState(false);
