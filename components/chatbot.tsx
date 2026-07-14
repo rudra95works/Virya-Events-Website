@@ -148,8 +148,27 @@ return (
   <div className="chatbot-container">
     <div className="chat-header">
       <div>
-        <h3>Virya Events AI</h3>
-        <span>Typically replies instantly</span>
+      <h3>
+  <span className="online-dot"></span>
+  Virya <span>AI</span>
+</h3>
+
+<div className="chat-subtitle">
+  Your Event Planning Assistant
+</div>
+
+<div className="chat-divider"></div>
+
+<div className="chat-status">
+  <span className="status-dot"></span>
+  <span className="status-online">Online</span>
+
+  <span className="status-separator">•</span>
+
+  <span className="status-text">
+    Typically replies instantly
+  </span>
+</div>
       </div>
 
       <button
