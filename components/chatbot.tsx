@@ -1,22 +1,54 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import "./chatbot.css";
+
+type Message = {
+  role: "user" | "assistant";
+  content: string;
+};
 
 export default function ChatBot() {
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<
-    { role: "user" | "assistant"; content: string }[]
-  >([]);
+
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      role: "assistant",
+      content:
+        "👋 Welcome to Virya Events.\n\nI'm your personal event planning assistant.\n\nChoose an event below or ask me anything to get started.",
+    },
+  ]);
+
   const [loading, setLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
-  async function sendMessage() {
-    if (!message.trim()) return;
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    const userMessage = message;
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+  }, [messages, loading]);
+
+  function quickSend(text: string) {
+    setMessage("");
+
+    setTimeout(() => {
+      sendMessage(text);
+    }, 50);
+  }
+
+  async function sendMessage(customMessage?: string) {
+    const userMessage = customMessage ?? message;
+
+    if (!userMessage.trim()) return;
 
     setMessages((prev) => [
       ...prev,
-      { role: "user", content: userMessage },
+      {
+        role: "user",
+        content: userMessage,
+      },
     ]);
 
     setMessage("");
@@ -39,7 +71,9 @@ export default function ChatBot() {
         ...prev,
         {
           role: "assistant",
-          content: data.reply,
+          content:
+            data.reply ??
+            "Sorry, I couldn't generate a response.",
         },
       ]);
     } catch {
@@ -55,63 +89,114 @@ export default function ChatBot() {
     setLoading(false);
   }
 
-  return (
-    <div
-      style={{
-        position: "fixed",
-        bottom: 20,
-        right: 20,
-        width: 350,
-        backgroundColor: "#ffffff",
-        color: "#000000",
-        border: "1px solid #ccc",
-        borderRadius: 12,
-        padding: 16,
-        zIndex: 9999,
-      }}
-    >
-      <h3>Virya Events AI</h3>
+  function handleKeyDown(
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) {
+    if (e.key === "Enter") {
+      sendMessage();
+    }
+  }
 
-      <div
-        style={{
-          height: 300,
-          overflowY: "auto",
-          border: "1px solid #ddd",
-          padding: 10,
-          marginBottom: 10,
-        }}
+  if (!isOpen) {
+    return (
+      <button
+        className="chat-launcher"
+        onClick={() => setIsOpen(true)}
       >
-        {messages.map((m, i) => (
-          <div key={i}>
-            <strong>{m.role === "user" ? "You" : "AI"}:</strong> {m.content}
+        <img
+          src="/virya-logo.png"
+          alt="Virya"
+          className="chat-launcher-logo"
+        />
+
+        <span className="chat-launcher-pulse"></span>
+      </button>
+    );
+  }
+
+  return (
+    <div className="chatbot-container">
+      <div className="chat-header">
+        <div>
+          <h3>Virya Events AI</h3>
+          <span>Typically replies instantly</span>
+        </div>
+
+        <button
+          className="close-btn"
+          onClick={() => setIsOpen(false)}
+        >
+          ✕
+        </button>
+      </div>
+
+      <div className="chat-messages">
+        {messages.map((msg, index) => (
+          <div
+            key={index}
+            className={
+              msg.role === "user"
+                ? "user-message"
+                : "assistant-message"
+            }
+          >
+            {msg.content}
           </div>
         ))}
 
-        {loading && <p>Thinking...</p>}
+        {loading && (
+          <div className="assistant-message typing">
+            Thinking...
+          </div>
+        )}
+
+        <div ref={messagesEndRef} />
       </div>
 
-      <input
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        placeholder="Ask about your event..."
-        style={{
-          width: "100%",
-          padding: 8,
-          marginBottom: 10,
-          border: "1px solid #ccc",
-        }}
-      />
+      <div className="quick-actions-wrapper">
+        <div className="quick-title">
+          Popular Events
+        </div>
 
-      <button
-        onClick={sendMessage}
-        style={{
-          width: "100%",
-          padding: 10,
-          cursor: "pointer",
-        }}
-      >
-        Send
-      </button>
+        <div className="quick-actions">
+          <button
+            onClick={() => quickSend("Birthday Party")}
+          >
+            🎂 Birthday
+          </button>
+
+          <button
+            onClick={() => quickSend("Wedding")}
+          >
+            💍 Wedding
+          </button>
+
+          <button
+            onClick={() => quickSend("Corporate Event")}
+          >
+            🏢 Corporate
+          </button>
+
+          <button
+            onClick={() => quickSend("Housewarming")}
+          >
+            🏡 Housewarming
+          </button>
+        </div>
+      </div>
+
+      <div className="chat-input">
+        <input
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Ask about your event..."
+        />
+
+        <button onClick={() => sendMessage()}>
+          Send
+        </button>
+      </div>
     </div>
   );
 }
