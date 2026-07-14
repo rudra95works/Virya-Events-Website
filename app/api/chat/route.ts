@@ -1,5 +1,6 @@
 import Groq from "groq-sdk";
 import { NextResponse } from "next/server";
+import { VIRYA_KNOWLEDGE } from "./knowledge";
 
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
@@ -158,6 +159,14 @@ IMPORTANT RULES
 • Stay focused on Virya Events and event planning.
 • If the customer asks something unrelated to events, politely redirect the conversation back to Virya Events.
 • Always maintain a premium, trustworthy and professional tone.
+
+====================================
+VIRYA EVENTS KNOWLEDGE BASE
+====================================
+
+${VIRYA_KNOWLEDGE}
+
+
 `,
         },
 
