@@ -23,6 +23,9 @@ export default function ChatBot() {
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
+  const [showPrompt, setShowPrompt] = useState(false);
+const [promptDismissed, setPromptDismissed] = useState(false);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -30,6 +33,16 @@ export default function ChatBot() {
       behavior: "smooth",
     });
   }, [messages, loading]);
+
+  useEffect(() => {
+  if (isOpen || promptDismissed) return;
+
+  const timer = setTimeout(() => {
+    setShowPrompt(true);
+  }, 5000);
+
+  return () => clearTimeout(timer);
+}, [isOpen, promptDismissed]);
 
   function quickSend(text: string) {
     setMessage("");
@@ -134,7 +147,40 @@ export default function ChatBot() {
   }
 
   if (!isOpen) {
-    return (
+  return (
+    <>
+      {showPrompt && (
+        <div className="chat-invite">
+
+          <button
+            className="chat-invite-close"
+            onClick={() => {
+              setShowPrompt(false);
+              setPromptDismissed(true);
+            }}
+          >
+            ✕
+          </button>
+
+          <h4>Need help planning your event?</h4>
+
+          <p>
+           Tell us about the celebration you have in mind. We'll help bring it to life.
+          </p>
+
+          <button
+            className="chat-invite-button"
+            onClick={() => {
+              setShowPrompt(false);
+              setIsOpen(true);
+            }}
+          >
+            Chat with Virya AI
+          </button>
+
+        </div>
+      )}
+
       <button
         className="chat-launcher"
         onClick={() => setIsOpen(true)}
@@ -145,8 +191,9 @@ export default function ChatBot() {
           className="chat-launcher-logo"
         />
       </button>
-    );
-  }
+    </>
+  );
+}
 
   return (    <div className="chatbot-container">
 
