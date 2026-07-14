@@ -8,7 +8,7 @@ import { GallerySection } from '@/components/gallery-section'
 import { FaqSection } from '@/components/faq-section'
 import { ContactSection } from '@/components/contact-section'
 import { SiteFooter } from '@/components/site-footer'
-import { ChatbotPlaceholder } from '@/components/chatbot-placeholder'
+import ChatBot from "@/components/chatbot"
 
 export default function Page() {
   return (
@@ -25,7 +25,7 @@ export default function Page() {
         <ContactSection />
       </main>
       <SiteFooter />
-      <ChatbotPlaceholder />
+      <ChatBot />
     </>
   )
 }
