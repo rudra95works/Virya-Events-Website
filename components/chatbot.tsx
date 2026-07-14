@@ -9,6 +9,7 @@ type Message = {
 };
 
 export default function ChatBot() {
+
   const [message, setMessage] = useState("");
 
   const [messages, setMessages] = useState<Message[]>([
@@ -41,7 +42,6 @@ export default function ChatBot() {
   async function typeMessage(text: string) {
     let current = "";
 
-    // Create an empty assistant message
     setMessages((prev) => [
       ...prev,
       {
@@ -50,7 +50,6 @@ export default function ChatBot() {
       },
     ]);
 
-    // Type the response character by character
     for (let i = 0; i < text.length; i++) {
       current += text[i];
 
@@ -72,6 +71,7 @@ export default function ChatBot() {
   }
 
   async function sendMessage(customMessage?: string) {
+
     const userMessage = customMessage ?? message;
 
     if (!userMessage.trim()) return;
@@ -90,6 +90,7 @@ export default function ChatBot() {
     setLoading(true);
 
     try {
+
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: {
@@ -102,11 +103,15 @@ export default function ChatBot() {
 
       const data = await res.json();
 
+      setLoading(false);
+
       await typeMessage(
         data.reply ??
           "Sorry, I couldn't generate a response."
       );
+
     } catch {
+
       setMessages((prev) => [
         ...prev,
         {
@@ -115,142 +120,207 @@ export default function ChatBot() {
             "Sorry, something went wrong.",
         },
       ]);
+
+      setLoading(false);
     }
-
-    setLoading(false);
   }
+
   function handleKeyDown(
-  e: React.KeyboardEvent<HTMLInputElement>
-) {
-  if (e.key === "Enter") {
-    sendMessage();
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) {
+    if (e.key === "Enter") {
+      sendMessage();
+    }
   }
-}
 
-if (!isOpen) {
-  return (
-    <button
-      className="chat-launcher"
-      onClick={() => setIsOpen(true)}
-    >
-      <img
-        src="/virya-logo.png"
-        alt="Virya"
-        className="chat-launcher-logo"
-      />
+  if (!isOpen) {
+    return (
+      <button
+        className="chat-launcher"
+        onClick={() => setIsOpen(true)}
+      >
+        <img
+          src="/virya-ai-orb.png"
+          alt="Virya AI"
+          className="chat-launcher-logo"
+        />
+      </button>
+    );
+  }
 
-      <span className="chat-launcher-pulse"></span>
-    </button>
+  return (    <div className="chatbot-container">
+
+      <div className="chat-header">
+
+        <div className="chat-header-left">
+
+          <img
+            src="/virya-ai-orb.png"
+            alt="Virya AI"
+            className="chat-header-avatar"
+          />
+
+          <div className="chat-header-info">
+
+            <h3>
+              Virya <span>AI</span>
+            </h3>
+
+            <div className="chat-subtitle">
+              Your Event Planning Assistant
+            </div>
+
+            <div className="chat-divider"></div>
+
+            <div className="chat-status">
+
+              <span className="status-dot"></span>
+
+              <span className="status-online">
+                Online
+              </span>
+
+              <span className="status-separator">
+                •
+              </span>
+
+              <span className="status-text">
+                Typically replies instantly
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <button
+          className="close-btn"
+          onClick={() => setIsOpen(false)}
+        >
+          ✕
+        </button>
+
+      </div>
+
+      <div className="chat-messages">
+
+        {messages.map((msg, index) =>
+
+          msg.role === "assistant" ? (
+
+            <div
+              key={index}
+              className="assistant-row"
+            >
+
+              <img
+                src="/virya-ai-orb.png"
+                alt="Virya AI"
+                className="assistant-avatar"
+              />
+
+              <div className="assistant-message">
+                {msg.content}
+              </div>
+
+            </div>
+
+          ) : (
+
+            <div
+              key={index}
+              className="user-message"
+            >
+              {msg.content}
+            </div>
+
+          )
+
+        )}
+
+        {loading && (
+
+          <div className="assistant-row">
+
+            <img
+              src="/virya-ai-orb.png"
+              alt="Virya AI"
+              className="assistant-avatar"
+            />
+
+            <div className="assistant-message typing">
+              Planning your event...
+            </div>
+
+          </div>
+
+        )}
+
+        <div ref={messagesEndRef} />
+
+      </div>
+
+      {messages.length === 1 && (
+
+        <div className="quick-actions-wrapper">
+
+          <div className="quick-title">
+            Popular Events
+          </div>
+
+          <div className="quick-actions">
+
+            <button
+              onClick={() => quickSend("Birthday Party")}
+            >
+              🎂 Birthday
+            </button>
+
+            <button
+              onClick={() => quickSend("Wedding")}
+            >
+              💍 Wedding
+            </button>
+
+            <button
+              onClick={() => quickSend("Corporate Event")}
+            >
+              🏢 Corporate
+            </button>
+
+            <button
+              onClick={() => quickSend("Housewarming")}
+            >
+              🏡 Housewarming
+            </button>
+
+          </div>
+
+        </div>
+
+      )}
+
+      <div className="chat-input">
+
+        <input
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Ask about your event..."
+        />
+
+        <button
+          onClick={() => sendMessage()}
+          disabled={loading}
+        >
+          {loading ? "..." : "Send"}
+        </button>
+
+      </div>
+
+    </div>
+
   );
 }
 
-return (
-  <div className="chatbot-container">
-    <div className="chat-header">
-      <div>
-      <h3>
-  <span className="online-dot"></span>
-  Virya <span>AI</span>
-</h3>
-
-<div className="chat-subtitle">
-  Your Event Planning Assistant
-</div>
-
-<div className="chat-divider"></div>
-
-<div className="chat-status">
-  <span className="status-dot"></span>
-  <span className="status-online">Online</span>
-
-  <span className="status-separator">•</span>
-
-  <span className="status-text">
-    Typically replies instantly
-  </span>
-</div>
-      </div>
-
-      <button
-        className="close-btn"
-        onClick={() => setIsOpen(false)}
-      >
-        ✕
-      </button>
-    </div>
-
-    <div className="chat-messages">
-      {messages.map((msg, index) => (
-        <div
-          key={index}
-          className={
-            msg.role === "user"
-              ? "user-message"
-              : "assistant-message"
-          }
-        >
-          {msg.content}
-        </div>
-      ))}
-
-      {loading && messages.length === 1 && (
-        <div className="assistant-message typing">
-          Thinking...
-        </div>
-      )}
-
-      <div ref={messagesEndRef} />
-    </div>
-
-    {messages.length === 1 && (
-  <div className="quick-actions-wrapper">
-    <div className="quick-title">
-      Popular Events
-    </div>
-
-    <div className="quick-actions">
-      <button
-        onClick={() => quickSend("Birthday Party")}
-      >
-        🎂 Birthday
-      </button>
-
-      <button
-        onClick={() => quickSend("Wedding")}
-      >
-        💍 Wedding
-      </button>
-
-      <button
-        onClick={() => quickSend("Corporate Event")}
-      >
-        🏢 Corporate
-      </button>
-
-      <button
-        onClick={() => quickSend("Housewarming")}
-      >
-        🏡 Housewarming
-      </button>
-    </div>
-  </div>
-)}
-
-    <div className="chat-input">
-      <input
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder="Ask about your event..."
-      />
-
-      <button
-        onClick={() => sendMessage()}
-        disabled={loading}
-      >
-        {loading ? "..." : "Send"}
-      </button>
-    </div>
-  </div>
-);
-}

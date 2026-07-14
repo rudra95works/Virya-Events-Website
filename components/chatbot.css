@@ -9,60 +9,56 @@
 ========================================================= */
 
 .chat-launcher{
-  position:fixed;
-  right:28px;
-  bottom:28px;
-  width:64px;
-  height:64px;
-  border:none;
-  border-radius:50%;
-  background:linear-gradient(135deg,#111827,#1f2937);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  overflow:visible;
-  z-index:9999;
-  box-shadow:
-    0 15px 35px rgba(0,0,0,.28),
-    0 0 0 1px rgba(255,255,255,.04);
-  transition:
-    transform .25s ease,
-    box-shadow .25s ease;
+    position:fixed;
+    right:28px;
+    bottom:28px;
+
+    width:74px;
+    height:74px;
+
+    background:transparent;
+    border:none;
+    border-radius:0;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    cursor:pointer;
+
+    overflow:visible;
+
+    z-index:9999;
+
+    box-shadow:none;
+
+    transition:transform .25s ease;
 }
 
 .chat-launcher:hover{
-  transform:scale(1.08);
-  box-shadow:
-    0 22px 55px rgba(0,0,0,.40);
+    transform:scale(1.08);
 }
 
 .chat-launcher-logo{
-  width:44px;
-  height:44px;
-  object-fit:contain;
-  position:relative;
-  z-index:3;
-  pointer-events:none;
+    width:74px;
+    height:74px;
+    object-fit:contain;
+    background:transparent;
+    filter: drop-shadow(0 10px 25px rgba(0,0,0,.35));
 }
+
+.chat-launcher-pulse{
+    display:none !important;
+}
+
 
 /* =========================================================
    2. LAUNCHER ANIMATIONS
 ========================================================= */
 
-.chat-launcher-pulse{
-  position:absolute;
-  inset:-8px;
-  border-radius:50%;
-  border:2px solid rgba(212,175,55,.45);
-  animation:pulseRing 2.4s infinite;
-}
 
-@keyframes pulseRing{
-  0%{transform:scale(1);opacity:.75;}
-  70%{transform:scale(1.35);opacity:0;}
-  100%{transform:scale(1.35);opacity:0;}
-}
+
+
 
 /* =========================================================
    3. CHAT WINDOW
@@ -152,18 +148,67 @@ margin:10px 0;
 
 }
 
+/* =========================================================
+   HEADER LAYOUT
+========================================================= */
+
+/* =========================================================
+   HEADER LAYOUT
+========================================================= */
+.chat-header-left{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex:1;
+}
+
+.chat-header-info{
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
+
+    margin-top:-2px;
+}
+
+.chat-header-avatar{
+    width:50px;
+    height:50px;
+
+    object-fit:contain;
+    flex-shrink:0;
+
+    margin-top:8px;
+
+    filter:drop-shadow(0 8px 16px rgba(0,0,0,.30));
+
+    animation:floatHeader 5s ease-in-out infinite;
+}
+
+.chat-subtitle{
+    margin-top:0px
+}
+
+
+
+
+
+.chat-subtitle{
+    margin-top:0px
+}
+
+
+
 /* ===========================
    Status
 =========================== */
 
 .chat-status{
-  display:flex;
-  align-items:center;
-  gap:6px;
+    display:flex;
+    align-items:center;
+    gap:8px;
 
-  margin-top:2px;
-
-  font-size:13px;
+    margin-top:0px;
+    margin-left:-56px;
 }
 
 .status-dot{
@@ -318,6 +363,7 @@ margin:10px 0;
 .typing{
   color:#666;
   font-style:italic;
+  opacity:.85;
 }
 
 /* =========================================================
@@ -522,4 +568,97 @@ background:#B68D1D;
   color:#B48A18;
 
   margin-bottom:12px;
+}
+
+
+
+/* =========================================================
+   ASSISTANT AVATAR
+========================================================= */
+
+.assistant-row{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+}
+
+.assistant-avatar{
+  width:36px;
+  height:36px;
+  object-fit:contain;
+  flex-shrink:0;
+}
+
+.close-btn{
+    position:relative;
+    top:-26px;
+}
+
+
+
+/* =========================================================
+   10. VIRYA AI ORB
+========================================================= */
+
+.chat-header-avatar{
+    width:50px;
+    height:50px;
+
+    object-fit:contain;
+    flex-shrink:0;
+
+    position:relative;
+    top:-26px;
+
+    filter:drop-shadow(0 8px 16px rgba(0,0,0,.30));
+
+    animation:floatHeader 5s ease-in-out infinite;
+}
+
+@keyframes floatOrb{
+
+    0%{
+        transform:translateY(0px);
+    }
+
+    50%{
+        transform:translateY(-2px);
+    }
+
+    100%{
+        transform:translateY(0px);
+    }
+
+}
+
+@keyframes floatLauncher {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.chat-launcher-logo{
+    animation: floatLauncher 4s ease-in-out infinite;
+}
+
+@keyframes floatHeader {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.chat-header-avatar{
+    animation: floatHeader 5s ease-in-out infinite;
 }
