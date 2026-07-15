@@ -21,6 +21,9 @@ export async function POST(req: Request) {
 
     const chatCompletion = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
+      response_format: {
+  type: "json_object",
+},
 
       messages: [
         {

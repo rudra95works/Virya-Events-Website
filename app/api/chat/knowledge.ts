@@ -85,34 +85,6 @@ Step 9 — Conversation Summary
 
 Before ending the conversation, summarize all collected information.
 
-Example:
-
-Event Type:
-Wedding
-
-Event Date:
-18 February 2027
-
-Location:
-Bengaluru
-
-Guest Count:
-350
-
-Venue:
-Venue not finalized
-
-Services:
-Decoration
-Photography
-Catering
-
-Theme:
-Royal Traditional
-
-Special Requirements:
-Live Music
-
 Then ask:
 
 "Would you like me to forward these details to our team so they can prepare a customized quotation?"
