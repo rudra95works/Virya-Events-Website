@@ -19,6 +19,7 @@ type Lead = {
   budget: string;
   services: string[];
   requirements: string;
+  conversationSummary: string;
 };
 
 export default function ChatBot() {
@@ -36,7 +37,7 @@ export default function ChatBot() {
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  const [lead, setLead] = useState<Lead>({
+const [lead, setLead] = useState<Lead>({
   name: "",
   phone: "",
   email: "",
@@ -47,6 +48,33 @@ export default function ChatBot() {
   budget: "",
   services: [],
   requirements: "",
+  conversationSummary: "",
+});
+
+const lastSubmittedLead = useRef("");
+
+function isLeadComplete(lead: Lead) {
+  return Boolean(
+    lead.name &&
+    lead.phone &&
+    lead.eventType &&
+    lead.eventDate &&
+    lead.guests
+  );
+}
+
+const [leadSubmitted, setLeadSubmitted] = useState(false);
+
+const [leadId] = useState(() => {
+  const existing = localStorage.getItem("viryaLeadId");
+
+  if (existing) return existing;
+
+  const id = crypto.randomUUID();
+
+  localStorage.setItem("viryaLeadId", id);
+
+  return id;
 });
 
   const [showPrompt, setShowPrompt] = useState(false);
@@ -54,13 +82,28 @@ const [promptDismissed, setPromptDismissed] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: "smooth",
-    });
-  }, [messages, loading]);
+useEffect(() => {
+  messagesEndRef.current?.scrollIntoView({
+    behavior: "smooth",
+  });
+}, [messages, loading]);
 
-  useEffect(() => {
+useEffect(() => {
+  if (!isLeadComplete(lead)) return;
+
+  const current = JSON.stringify(lead);
+
+  if (current === lastSubmittedLead.current) return;
+
+  const timer = setTimeout(() => {
+    lastSubmittedLead.current = current;
+    submitLead();
+  }, 1000);
+
+  return () => clearTimeout(timer);
+}, [lead]);
+
+useEffect(() => {
   if (isOpen || promptDismissed) return;
 
   const timer = setTimeout(() => {
@@ -70,13 +113,13 @@ const [promptDismissed, setPromptDismissed] = useState(false);
   return () => clearTimeout(timer);
 }, [isOpen, promptDismissed]);
 
-  function quickSend(text: string) {
-    setMessage("");
+function quickSend(text: string) {
+  setMessage("");
 
-    setTimeout(() => {
-      sendMessage(text);
-    }, 50);
-  }
+  setTimeout(() => {
+    sendMessage(text);
+  }, 50);
+}
 
   async function typeMessage(text: string) {
     let current = "";
@@ -141,11 +184,20 @@ const [promptDismissed, setPromptDismissed] = useState(false);
       });
 
       const data = await res.json();
-      
-      setLead((prev) => ({
-  ...prev,
-  ...data.leadUpdate,
-}));
+
+      setLead((prev) => {
+  const updated = {
+    ...prev,
+    ...data.leadUpdate,
+    conversationSummary:
+      data.conversationSummary ||
+      prev.conversationSummary,
+  };
+
+  console.log("Updated Lead:", updated);
+
+  return updated;
+});
 
       setLoading(false);
 
@@ -176,6 +228,37 @@ const [promptDismissed, setPromptDismissed] = useState(false);
       sendMessage();
     }
   }
+
+ async function submitLead() {
+  try {
+    const res = await fetch("/api/lead", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+  leadId,
+  ...lead,
+  conversationSummary: lead.conversationSummary,
+}),
+    });
+
+    const data = await res.json();
+
+    console.log(data);
+
+    if (!res.ok) {
+      console.error(data);
+      return;
+    }
+
+    
+
+    console.log("Lead submitted successfully.");
+  } catch (error) {
+    console.error(error);
+  }
+}
 
   if (!isOpen) {
   return (
@@ -378,6 +461,8 @@ const [promptDismissed, setPromptDismissed] = useState(false);
         </div>
 
       )}
+
+    
 
       <div className="chat-input">
 
