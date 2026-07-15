@@ -65,17 +65,7 @@ function isLeadComplete(lead: Lead) {
 
 const [leadSubmitted, setLeadSubmitted] = useState(false);
 
-const [leadId] = useState(() => {
-  const existing = localStorage.getItem("viryaLeadId");
-
-  if (existing) return existing;
-
-  const id = crypto.randomUUID();
-
-  localStorage.setItem("viryaLeadId", id);
-
-  return id;
-});
+const [leadId, setLeadId] = useState("");
 
   const [showPrompt, setShowPrompt] = useState(false);
 const [promptDismissed, setPromptDismissed] = useState(false);
@@ -112,6 +102,20 @@ useEffect(() => {
 
   return () => clearTimeout(timer);
 }, [isOpen, promptDismissed]);
+
+useEffect(() => {
+  const existing = localStorage.getItem("viryaLeadId");
+
+  if (existing) {
+    setLeadId(existing);
+    return;
+  }
+
+  const id = crypto.randomUUID();
+
+  localStorage.setItem("viryaLeadId", id);
+  setLeadId(id);
+}, []);
 
 function quickSend(text: string) {
   setMessage("");
