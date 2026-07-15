@@ -1,9 +1,16 @@
 import { NextResponse } from "next/server";
 import { google } from "googleapis";
+import { sendLeadNotification } from "@/app/lib/sendLeadNotification";
+import crypto from "crypto";
 
 export async function POST(req: Request) {
   try {
     const lead = await req.json();
+
+    const leadId =
+  lead.leadId || crypto.randomUUID();
+
+lead.leadId = leadId;
 
     const auth = new google.auth.GoogleAuth({
       credentials: {
@@ -139,9 +146,12 @@ export async function POST(req: Request) {
       });
 
     }
-        return NextResponse.json({
-      success: true,
-    });
+    await sendLeadNotification(lead);
+    
+      return NextResponse.json({
+  success: true,
+  leadId,
+});  
 
   } catch (error) {
 

@@ -94,10 +94,10 @@ Never wrap JSON inside code blocks.
 Return exactly:
 
 {
-  "reply": "...",
-
-   "conversationSummary": "",
-
+  "reply": "",
+  "mode": "chat",
+  "options": [],
+  "conversationSummary": "",
   "leadUpdate": {
     "name": "",
     "phone": "",

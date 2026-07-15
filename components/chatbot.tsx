@@ -26,46 +26,40 @@ export default function ChatBot() {
 
   const [message, setMessage] = useState("");
 
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "assistant",
-      content:
-        "👋 Welcome to Virya Events.\n\nI'm your personal event planning assistant.\n\nChoose an event below or ask me anything to get started.",
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
 
-  const [loading, setLoading] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
+ const [loading, setLoading] = useState(false);
+const [isOpen, setIsOpen] = useState(false);
+
+const [showLeadForm, setShowLeadForm] = useState(true);
+
+const [leadId, setLeadId] = useState("");
+
+
 
 const [lead, setLead] = useState<Lead>({
   name: "",
   phone: "",
   email: "",
+
   eventType: "",
   eventDate: "",
   guests: "",
   venue: "",
   budget: "",
+
   services: [],
+
   requirements: "",
   conversationSummary: "",
 });
 
-const lastSubmittedLead = useRef("");
 
-function isLeadComplete(lead: Lead) {
-  return Boolean(
-    lead.name &&
-    lead.phone &&
-    lead.eventType &&
-    lead.eventDate &&
-    lead.guests
-  );
-}
+const [chatMode, setChatMode] = useState<"chat" | "question">("chat");
 
-const [leadSubmitted, setLeadSubmitted] = useState(false);
+const [currentQuestion, setCurrentQuestion] = useState("");
 
-const [leadId, setLeadId] = useState("");
+const [options, setOptions] = useState<string[]>([]);
 
   const [showPrompt, setShowPrompt] = useState(false);
 const [promptDismissed, setPromptDismissed] = useState(false);
@@ -78,20 +72,7 @@ useEffect(() => {
   });
 }, [messages, loading]);
 
-useEffect(() => {
-  if (!isLeadComplete(lead)) return;
 
-  const current = JSON.stringify(lead);
-
-  if (current === lastSubmittedLead.current) return;
-
-  const timer = setTimeout(() => {
-    lastSubmittedLead.current = current;
-    submitLead();
-  }, 1000);
-
-  return () => clearTimeout(timer);
-}, [lead]);
 
 useEffect(() => {
   if (isOpen || promptDismissed) return;
@@ -103,19 +84,6 @@ useEffect(() => {
   return () => clearTimeout(timer);
 }, [isOpen, promptDismissed]);
 
-useEffect(() => {
-  const existing = localStorage.getItem("viryaLeadId");
-
-  if (existing) {
-    setLeadId(existing);
-    return;
-  }
-
-  const id = crypto.randomUUID();
-
-  localStorage.setItem("viryaLeadId", id);
-  setLeadId(id);
-}, []);
 
 function quickSend(text: string) {
   setMessage("");
@@ -158,11 +126,15 @@ function quickSend(text: string) {
 
   async function sendMessage(customMessage?: string) {
 
-    const userMessage = customMessage ?? message;
+  const isSystemRequest = customMessage !== undefined;
 
-    if (!userMessage.trim()) return;
+  const userMessage = customMessage ?? message;
 
-    const conversation: Message[] = [
+  if (!isSystemRequest && !userMessage.trim()) return;
+
+    const conversation: Message[] = isSystemRequest
+  ? [...messages]
+  : [
       ...messages,
       {
         role: "user",
@@ -183,25 +155,28 @@ function quickSend(text: string) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          messages: conversation,
-        }),
+  leadId,
+  lead,
+  messages: conversation,
+}),
       });
 
       const data = await res.json();
 
-      setLead((prev) => {
-  const updated = {
-    ...prev,
-    ...data.leadUpdate,
-    conversationSummary:
-      data.conversationSummary ||
-      prev.conversationSummary,
-  };
+setChatMode(data.mode ?? "chat");
+setCurrentQuestion(data.reply ?? "");
+setOptions(data.options ?? []);
 
-  console.log("Updated Lead:", updated);
+const updatedLead = {
+  ...lead,
+  ...data.leadUpdate,
+  conversationSummary:
+    data.conversationSummary ??
+    lead.conversationSummary,
+};
 
-  return updated;
-});
+setLead(updatedLead);
+
 
       setLoading(false);
 
@@ -241,27 +216,50 @@ function quickSend(text: string) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-  leadId,
-  ...lead,
-  conversationSummary: lead.conversationSummary,
-}),
+        ...lead,
+      }),
     });
 
     const data = await res.json();
 
-    console.log(data);
-
     if (!res.ok) {
       console.error(data);
-      return;
+      return false;
     }
 
-    
+    setLeadId(data.leadId);
 
-    console.log("Lead submitted successfully.");
+    console.log("Lead Created:", data.leadId);
+
+    return true;
+
   } catch (error) {
+
     console.error(error);
+
+    return false;
   }
+}
+async function startConversation() {
+
+  if (!lead.name.trim()) {
+    alert("Please enter your name.");
+    return;
+  }
+
+  if (!lead.phone.trim()) {
+    alert("Please enter your phone number.");
+    return;
+  }
+
+
+  const success = await submitLead();
+
+if (!success) return;
+
+setShowLeadForm(false);
+
+sendMessage("__SYSTEM_START__");
 }
 
   if (!isOpen) {
@@ -313,7 +311,8 @@ function quickSend(text: string) {
   );
 }
 
-  return (    <div className="chatbot-container">
+  return (
+  <div className="chatbot-container">
 
       <div className="chat-header">
 
@@ -354,59 +353,107 @@ function quickSend(text: string) {
               </span>
 
             </div>
+            <div className="whatsapp-banner">
 
-          </div>
+  <div className="whatsapp-text">
 
-        </div>
+    <strong>Prefer talking to a person?</strong>
 
-        <button
-          className="close-btn"
-          onClick={() => setIsOpen(false)}
-        >
-          ✕
-        </button>
+    <span>
+      Chat directly with a Virya Event Planner.
+    </span>
 
-      </div>
+  </div>
 
-      <div className="chat-messages">
+  <a
+  href="https://wa.me/91YOURNUMBER"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="whatsapp-button"
+>
+  WhatsApp
+</a>
 
-        {messages.map((msg, index) =>
+</div>
 
-          msg.role === "assistant" ? (
+</div>
 
-            <div
-              key={index}
-              className="assistant-row"
-            >
+</div>
 
-              <img
-                src="/virya-ai-orb.png"
-                alt="Virya AI"
-                className="assistant-avatar"
-              />
+<button
+  className="close-btn"
+  onClick={() => setIsOpen(false)}
+>
+  ✕
+</button>
 
-              <div className="assistant-message">
-                {msg.content}
-              </div>
+</div>
 
-            </div>
+<div className="chat-messages">
 
-          ) : (
+  {showLeadForm ? (
 
-            <div
-              key={index}
-              className="user-message"
-            >
-              {msg.content}
-            </div>
+    <div className="lead-form">
 
-          )
+      <h3>Let's plan your event</h3>
 
-        )}
+      <p>
+        Enter your details to start chatting with Virya AI.
+      </p>
 
-        {loading && (
+      <input
+        placeholder="Your Name *"
+        value={lead.name}
+        onChange={(e) =>
+          setLead({
+            ...lead,
+            name: e.target.value,
+          })
+        }
+      />
 
-          <div className="assistant-row">
+      <input
+        placeholder="Phone Number *"
+        value={lead.phone}
+        onChange={(e) =>
+          setLead({
+            ...lead,
+            phone: e.target.value,
+          })
+        }
+      />
+
+      <input
+        placeholder="Email (Optional)"
+        value={lead.email}
+        onChange={(e) =>
+          setLead({
+            ...lead,
+            email: e.target.value,
+          })
+        }
+      />
+
+      <button
+        onClick={startConversation}
+      >
+        Continue
+      </button>
+
+    </div>
+
+  ) : (
+
+    <>
+
+      {messages.map((msg, index) =>
+
+        msg.role === "assistant" ? (
+
+          <div
+            key={index}
+            className="assistant-row"
+          >
 
             <img
               src="/virya-ai-orb.png"
@@ -414,80 +461,100 @@ function quickSend(text: string) {
               className="assistant-avatar"
             />
 
-            <div className="assistant-message typing">
-              Planning your event...
+            <div className="assistant-message">
+              {msg.content}
             </div>
 
           </div>
 
-        )}
+        ) : (
 
-        <div ref={messagesEndRef} />
-
-      </div>
-
-      {messages.length === 1 && (
-
-        <div className="quick-actions-wrapper">
-
-          <div className="quick-title">
-            Quick Start
+          <div
+            key={index}
+            className="user-message"
+          >
+            {msg.content}
           </div>
 
-          <div className="quick-actions">
+        )
 
-            <button
-              onClick={() => quickSend("Birthday Party")}
-            >
-              🎂 Birthday
-            </button>
+      )}
 
-            <button
-              onClick={() => quickSend("Wedding")}
-            >
-              💍 Wedding
-            </button>
+      {loading && (
 
-            <button
-              onClick={() => quickSend("Corporate Event")}
-            >
-              🏢 Corporate
-            </button>
+        <div className="assistant-row">
 
-            <button
-              onClick={() => quickSend("Housewarming")}
-            >
-              🏡 Housewarming
-            </button>
+          <img
+            src="/virya-ai-orb.png"
+            alt="Virya AI"
+            className="assistant-avatar"
+          />
 
+          <div className="assistant-message typing">
+            Planning your event...
           </div>
 
         </div>
 
       )}
 
-    
+      <div ref={messagesEndRef} />
 
-      <div className="chat-input">
+    </>
 
-        <input
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Ask about your event..."
-        />
+  )}
 
-        <button
-          onClick={() => sendMessage()}
-          disabled={loading}
-        >
-          {loading ? "..." : "Send"}
-        </button>
+</div>
 
-      </div>
+{!showLeadForm && chatMode === "question" ? (
 
-    </div>
+  <div className="guided-flow">
 
-  );
+  <h3>{currentQuestion}</h3>
+
+  <div className="guided-options">
+
+    {options.map((option) => (
+
+      <button
+        key={option}
+        className="guided-option"
+        onClick={() => sendMessage(option)}
+      >
+        {option}
+      </button>
+
+    ))}
+
+  </div>
+
+</div>
+
+) : !showLeadForm && (
+
+  <div className="chat-input">
+
+    <input
+      value={message}
+      onChange={(e) => setMessage(e.target.value)}
+      onKeyDown={handleKeyDown}
+      placeholder="Ask about your event..."
+    />
+
+    <button
+      onClick={() => sendMessage()}
+      disabled={loading}
+    >
+      {loading ? "..." : "Send"}
+    </button>
+
+  </div>
+
+)}
+
+</div>
+
+);
 }
+
 

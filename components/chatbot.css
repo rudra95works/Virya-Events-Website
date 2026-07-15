@@ -934,3 +934,106 @@ border-color:#D4AF37;
     }
 
 }
+
+/* =========================================================
+   WhatsApp Banner (Temporarily Hidden)
+========================================================= */
+
+.whatsapp-banner{
+  display:none !important;
+}
+
+.whatsapp-text{
+  display:none !important;
+}
+
+.whatsapp-button{
+  display:none !important;
+}
+
+
+some guideflow 
+
+.guided-flow{
+    padding:18px;
+    border-top:1px solid #ececec;
+}
+
+.guided-flow h3{
+    margin:0 0 14px;
+    font-size:16px;
+    font-weight:600;
+}
+
+.guided-options{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+
+.guided-option{
+    padding:14px;
+    border-radius:12px;
+    border:1px solid #ddd;
+    background:white;
+    cursor:pointer;
+    transition:.2s;
+    font-size:14px;
+    font-weight:500;
+}
+
+.guided-option:hover{
+    border-color:#d4af37;
+    background:#fffaf0;
+}
+
+/* =========================================================
+   Lead Form
+========================================================= */
+
+.lead-form{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    padding:20px;
+}
+
+.lead-form h3{
+    margin:0;
+    color:#111827;
+    font-size:22px;
+    font-weight:700;
+}
+
+.lead-form p{
+    margin:0 0 6px;
+    color:#6b7280;
+    line-height:1.5;
+}
+
+.lead-form input{
+    width:100%;
+    height:46px;
+    padding:0 14px;
+    border:1px solid #d1d5db;
+    border-radius:12px;
+    font-size:15px;
+    outline:none;
+    background:#fff;
+    box-sizing:border-box;
+}
+
+.lead-form input:focus{
+    border-color:#D4AF37;
+    box-shadow:0 0 0 3px rgba(212,175,55,.15);
+}
+
+.lead-form button{
+    height:46px;
+    border:none;
+    border-radius:12px;
+    background:#D4AF37;
+    color:#111827;
+    font-weight:700;
+    cursor:pointer;
+}
