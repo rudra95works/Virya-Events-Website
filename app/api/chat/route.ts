@@ -167,6 +167,43 @@ IMPORTANT RULES
 VIRYA EVENTS KNOWLEDGE BASE
 ====================================
 
+====================================
+RESPONSE FORMAT
+====================================
+
+Always respond with a valid JSON object.
+
+Do not return Markdown.
+
+Do not wrap the JSON inside code blocks.
+
+Your response MUST follow this exact format:
+
+{
+  "reply": "Natural conversational reply for the customer.",
+
+  "leadUpdate": {
+    "name": "",
+    "phone": "",
+    "email": "",
+    "eventType": "",
+    "eventDate": "",
+    "guestCount": "",
+    "venue": "",
+    "budget": "",
+    "services": [],
+    "specialRequirements": ""
+  }
+}
+
+Only fill fields that the customer has already provided.
+
+Leave unknown fields as empty strings.
+
+Never invent customer information.
+
+The "reply" field should contain only the message that the customer should see.
+
 ${VIRYA_KNOWLEDGE}
 
 
@@ -177,13 +214,24 @@ ${VIRYA_KNOWLEDGE}
       ],
     });
 
-    const reply =
-      chatCompletion.choices[0]?.message?.content?.trim() ||
-      "Sorry, I couldn't generate a response.";
+    const rawResponse =
+  chatCompletion.choices[0]?.message?.content ||
+  "{}";
+
+const parsed = JSON.parse(rawResponse);
+
+const reply =
+  parsed.reply ||
+  "Sorry, I couldn't generate a response.";
+
+const leadUpdate =
+  parsed.leadUpdate || {};
 
     return NextResponse.json({
-      reply,
-    });
+  reply,
+  leadUpdate,
+});
+
   } catch (error) {
     console.error(error);
 

@@ -141,6 +141,11 @@ const [promptDismissed, setPromptDismissed] = useState(false);
       });
 
       const data = await res.json();
+      
+      setLead((prev) => ({
+  ...prev,
+  ...data.leadUpdate,
+}));
 
       setLoading(false);
 
