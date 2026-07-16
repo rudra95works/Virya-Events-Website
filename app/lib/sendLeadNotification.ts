@@ -2,7 +2,7 @@ import { resend } from "./resend";
 
 export async function sendLeadNotification(lead: any) {
   const result = await resend.emails.send({
-    from: "Virya Events <onboarding@resend.dev>",
+    from: "Virya Events <connect@virya.in>",
     to: "connect@virya.in",
 
     subject: `🔔 New Lead - ${lead.eventType || "Virya Events"}`,

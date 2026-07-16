@@ -52,6 +52,35 @@ const guidedFlow = [
     "More than 1 Month Away",
   ],
 },
+{
+  field: "venue",
+  question: "What kind of venue are you looking for?",
+  options: [
+    "I already have a venue",
+    "Need help finding one",
+    "Not decided yet",
+    "Virtual Event",
+  ],
+},
+{
+  field: "services",
+  question: "Which services are you interested in?",
+  options: [
+    "Decoration",
+    "Catering",
+    "Photography & Videography",
+    "DJ & Entertainment",
+    "Sound & Lighting",
+    "Invitation & RSVP",
+    "Makeup & Styling",
+    "Venue Assistance",
+  ],
+},
+{
+  field: "requirements",
+  question: "Anything else you'd like us to know about your event?",
+  options: [],
+},
 ];
 
 function getNextQuestion(lead: {
@@ -59,6 +88,9 @@ function getNextQuestion(lead: {
   guests: string;
   budget: string;
   eventDate: string;
+  venue: string;
+  services: string[];
+requirements: string;
 }) {
   if (!lead.eventType) {
     return guidedFlow[0];
@@ -74,6 +106,18 @@ function getNextQuestion(lead: {
 
 if (!lead.eventDate) {
   return guidedFlow[3];
+}
+
+if (!lead.venue) {
+  return guidedFlow[4];
+}
+
+if (!lead.services.length) {
+  return guidedFlow[5];
+}
+
+if (!lead.requirements) {
+  return guidedFlow[6];
 }
 
 return null;
@@ -125,7 +169,13 @@ if (
   field &&
   latestMessage !== "__SYSTEM_START__"
 ) {
-  (lead as Record<string, unknown>)[field] = latestMessage;
+
+  if (field === "services") {
+    lead.services = [latestMessage];
+  } else {
+    (lead as Record<string, unknown>)[field] = latestMessage;
+  }
+
 }
 }
 /*
@@ -143,7 +193,7 @@ if (nextQuestion) {
     field: nextQuestion.field,
     options: nextQuestion.options,
     leadUpdate: lead,
-    conversationSummary: "",
+conversationSummary: "",
   });
 }
 

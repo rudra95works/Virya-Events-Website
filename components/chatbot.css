@@ -1160,3 +1160,44 @@ opacity .25s;
     }
 
 }
+
+/* =========================================================
+   Continue Services Button
+========================================================= */
+
+.continue-services {
+  width: 100%;
+  margin-top: 16px;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: #d9b233;
+  color: #111827;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.continue-services:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   Some requirements box styling
+========================================================= */
+.requirements-box{
+  margin-top:16px;
+}
+
+.requirements-box h3{
+  font-size:18px;
+  font-weight:600;
+  margin-bottom:8px;
+}
+
+.requirements-box p{
+  color:#6b7280;
+  font-size:14px;
+  margin-bottom:16px;
+}

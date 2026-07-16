@@ -62,6 +62,7 @@ const [currentField, setCurrentField] = useState("");
 
 const [options, setOptions] = useState<string[]>([]);
 const [selectedOption, setSelectedOption] = useState("");
+const [selectedServices, setSelectedServices] = useState<string[]>([]);
 
   const [showPrompt, setShowPrompt] = useState(false);
 const [promptDismissed, setPromptDismissed] = useState(false);
@@ -533,8 +534,24 @@ sendMessage("__SYSTEM_START__");
 
       <div ref={messagesEndRef} />
       {!showLeadForm &&
-  chatMode === "question" &&
-  options.length > 0 && (
+chatMode === "question" &&
+currentField !== "requirements" ? (
+
+  currentField === "requirements" ? (
+
+    <div className="requirements-box">
+
+      <h3>
+        Anything else you'd like us to know about your event?
+      </h3>
+
+      <p>
+        This helps us personalise our recommendations.
+      </p>
+
+    </div>
+
+  ) : options.length > 0 ? (
 
     <div className="guided-flow">
 
@@ -545,22 +562,92 @@ sendMessage("__SYSTEM_START__");
           <button
             key={option}
             className={`guided-option ${
-  selectedOption === option ? "selected" : ""
-}`}
+              currentField === "services"
+                ? selectedServices.includes(option)
+                  ? "selected"
+                  : ""
+                : selectedOption === option
+                  ? "selected"
+                  : ""
+            }`}
             onClick={() => {
-  console.log("Selected option:", option);
-  setSelectedOption(option);
-  sendMessage(option);
-}}
+
+              if (currentField === "services") {
+
+                setSelectedServices((prev) =>
+                  prev.includes(option)
+                    ? prev.filter((item) => item !== option)
+                    : [...prev, option]
+                );
+
+              } else {
+
+                setSelectedOption(option);
+                sendMessage(option);
+
+              }
+
+            }}
           >
             {option}
           </button>
 
         ))}
 
+        {currentField === "services" && (
+          <button
+            className="continue-services"
+            disabled={selectedServices.length === 0}
+            onClick={() => {
+              sendMessage(selectedServices.join(", "));
+              setSelectedServices([]);
+            }}
+          >
+            Continue
+          </button>
+        )}
+
       </div>
 
     </div>
+
+  ) : null
+
+) : null}
+
+{!showLeadForm &&
+chatMode === "question" &&
+currentField === "requirements" && (
+
+  <div className="chat-input">
+
+    <div className="requirements-box">
+
+      <h3>
+        Anything else you'd like us to know about your event?
+      </h3>
+
+      <p>
+        This helps us personalise our recommendations.
+      </p>
+
+    </div>
+
+    <input
+      value={message}
+      onChange={(e) => setMessage(e.target.value)}
+      onKeyDown={handleKeyDown}
+      placeholder="Tell us anything else about your event..."
+    />
+
+    <button
+      onClick={() => sendMessage()}
+      disabled={loading}
+    >
+      {loading ? "..." : "Send"}
+    </button>
+
+  </div>
 
 )}
 
