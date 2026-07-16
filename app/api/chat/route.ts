@@ -15,11 +15,15 @@ const guidedFlow = [
     field: "eventType",
     question: "What type of event are you planning?",
     options: [
-      "Birthday",
-      "Wedding",
-      "Corporate",
-      "Housewarming",
-    ],
+  "Birthday",
+  "Wedding",
+  "Housewarming",
+  "Corporate Event",
+  "Engagement",
+  "Baby Shower",
+  "Anniversary",
+  "Others",
+],
   },
   {
     field: "guests",
@@ -189,16 +193,33 @@ conversationSummary: "",
 }
 
 // All guided questions completed
-lead.conversationSummary =
-  lead.conversationSummary || "Guided onboarding completed.";
+
+if (messages.length <= guidedFlow.length * 2) {
+
+  lead.conversationSummary =
+    lead.conversationSummary || "Guided onboarding completed.";
+
+  const servicesList = lead.services
+    .map((service) => `• ${service}`)
+    .join("\n");
 
   return NextResponse.json({
-  reply:
-    "Perfect! I have the basic details of your event. Ask me anything about your event, or share any additional requirements you'd like us to know.",
-  mode: "chat",
+  reply: `✓ Planning Complete
+
+Perfect! I have the basic details of your event.
+
+Selected services:
+${servicesList}
+
+Requirements Analyzed
+
+You can now ask me anything about your event.`,
+  mode: "completed",
   leadUpdate: lead,
   options: [],
 });
+
+}
 
 
 

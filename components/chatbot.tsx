@@ -12,16 +12,23 @@ type Lead = {
   name: string;
   phone: string;
   email: string;
+
   eventType: string;
   eventDate: string;
   guests: string;
   venue: string;
   budget: string;
-  services: string[];
-  requirements: string;
-  conversationSummary: string;
-};
 
+  services: string[];
+
+  requirements: string;
+
+  conversationSummary: string;
+
+  conversation: Message[];
+
+  notificationSent: boolean;
+};
 export default function ChatBot() {
 
   const [message, setMessage] = useState("");
@@ -51,11 +58,16 @@ const [lead, setLead] = useState<Lead>({
   services: [],
 
   requirements: "",
+
   conversationSummary: "",
+
+  conversation: [],
+
+  notificationSent: false,
 });
 
 
-const [chatMode, setChatMode] = useState<"chat" | "question">("chat");
+const [chatMode, setChatMode] = useState<"chat" | "question" | "completed">("chat");
 
 const [currentQuestion, setCurrentQuestion] = useState("");
 const [currentField, setCurrentField] = useState("");
@@ -65,6 +77,7 @@ const [selectedOption, setSelectedOption] = useState("");
 const [selectedServices, setSelectedServices] = useState<string[]>([]);
 
   const [showPrompt, setShowPrompt] = useState(false);
+  const [startingChat, setStartingChat] = useState(false);
 const [promptDismissed, setPromptDismissed] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -127,7 +140,10 @@ function quickSend(text: string) {
     }
   }
 
-  async function sendMessage(customMessage?: string) {
+  async function sendMessage(
+  customMessage?: string,
+  leadOverride?: Lead
+) {
 
   const isSystemRequest =
   customMessage === "__SYSTEM_START__";
@@ -160,7 +176,7 @@ function quickSend(text: string) {
         },
        body: JSON.stringify({
   leadId,
-  lead,
+  lead: leadOverride ?? lead,
   messages: conversation,
   field: currentField,
 }),
@@ -174,12 +190,37 @@ setCurrentField(data.field ?? "");
 setOptions(data.options ?? []);
 setSelectedOption("");
 
-const updatedLead = {
+      setLoading(false);
+
+      await typeMessage(
+        data.reply ??
+          "Sorry, I couldn't generate a response."
+      );
+
+      const updatedLead = {
   ...lead,
   ...data.leadUpdate,
+
   conversationSummary:
     data.conversationSummary ??
     lead.conversationSummary,
+
+  conversation:
+  data.mode === "chat"
+    ? [
+        ...(lead.conversation ?? []),
+        {
+          role: "user",
+          content: userMessage,
+        },
+        {
+          role: "assistant",
+          content:
+            data.reply ??
+            "Sorry, I couldn't generate a response.",
+        },
+      ]
+    : lead.conversation,
 };
 
 setLead(updatedLead);
@@ -195,14 +236,6 @@ if (leadId) {
     }),
   });
 }
-
-
-      setLoading(false);
-
-      await typeMessage(
-        data.reply ??
-          "Sorry, I couldn't generate a response."
-      );
 
     } catch {
 
@@ -261,24 +294,32 @@ if (leadId) {
 }
 async function startConversation() {
 
+  setStartingChat(true);
+
   if (!lead.name.trim()) {
     alert("Please enter your name.");
+    setStartingChat(false);
     return;
   }
 
-  if (!lead.phone.trim()) {
-    alert("Please enter your phone number.");
+  if (!/^\d{10}$/.test(lead.phone)) {
+    alert("Please enter a valid 10-digit phone number.");
+    setStartingChat(false);
     return;
   }
-
 
   const success = await submitLead();
 
-if (!success) return;
+  if (!success) {
+    setStartingChat(false);
+    return;
+  }
 
-setShowLeadForm(false);
+  setShowLeadForm(false);
 
-sendMessage("__SYSTEM_START__");
+  await sendMessage("__SYSTEM_START__");
+
+  setStartingChat(false);
 }
 
   if (!isOpen) {
@@ -445,16 +486,18 @@ sendMessage("__SYSTEM_START__");
       
 
 <input
+  type="tel"
+  inputMode="numeric"
+  maxLength={10}
   placeholder="Phone Number *"
-        value={lead.phone}
-        onChange={(e) =>
-          setLead({
-            ...lead,
-            phone: e.target.value,
-          })
-        }
-      />
-
+  value={lead.phone}
+  onChange={(e) =>
+    setLead({
+      ...lead,
+      phone: e.target.value.replace(/\D/g, "").slice(0, 10),
+    })
+  }
+/>
       
 
 <input
@@ -469,10 +512,13 @@ sendMessage("__SYSTEM_START__");
       />
 
       <button
-        onClick={startConversation}
-      >
-        Continue →
-      </button>
+  onClick={startConversation}
+  disabled={startingChat}
+>
+  {startingChat
+  ? "Starting your planning session..."
+  : "Continue →"}
+</button>
 
     </div>
 
@@ -496,8 +542,17 @@ sendMessage("__SYSTEM_START__");
             />
 
             <div className="assistant-message">
-              {msg.content}
-            </div>
+  {msg.content.split("Requirements Analyzed").map((part, index, array) => (
+    <span key={index}>
+      {part}
+      {index < array.length - 1 && (
+        <div className="ai-status">
+          Requirements Analyzed
+        </div>
+      )}
+    </span>
+  ))}
+</div>
 
           </div>
 
@@ -580,16 +635,28 @@ options.length > 0 && (
         ))}
 
         {currentField === "services" && (
-          <button
-            className="continue-services"
-            disabled={selectedServices.length === 0}
-            onClick={() => {
-              sendMessage(selectedServices.join(", "));
-              setSelectedServices([]);
-            }}
-          >
-            Continue
-          </button>
+         <button
+  className="continue-services"
+  disabled={selectedServices.length === 0}
+  onClick={() => {
+
+    const updatedLead = {
+  ...lead,
+  services: selectedServices,
+};
+
+setLead(updatedLead);
+
+sendMessage(
+  selectedServices.join(", "),
+  updatedLead
+);
+
+setSelectedServices([]);
+  }}
+>
+  Continue
+</button>
         )}
 
       </div>
@@ -605,9 +672,13 @@ options.length > 0 && (
 </div>
 
 {!showLeadForm &&
-chatMode === "chat" && (
+(chatMode === "chat" || chatMode === "completed") && (
 
   <div className="chat-footer">
+
+    <p className="chat-helper">
+  Ask anything about your event or tell us any additional requirements so we can provide the most suitable recommendations.
+</p>
 
 
     <div className="chat-input">
@@ -616,7 +687,7 @@ chatMode === "chat" && (
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Ask about your event or share any additional requirements..."
+        placeholder="Tell us more about the event..."
       />
 
       <button
@@ -637,4 +708,7 @@ chatMode === "chat" && (
 );
 }
 
+<div className="planning-complete">
+  <span>✓ Planning Complete</span>
+</div>
 

@@ -1,6 +1,8 @@
 import { resend } from "./resend";
 
 export async function sendLeadNotification(lead: any) {
+  console.log("Lead being emailed:");
+console.log(lead);
   const result = await resend.emails.send({
     from: "Virya Events <connect@virya.in>",
     to: "connect@virya.in",
@@ -33,8 +35,27 @@ export async function sendLeadNotification(lead: any) {
       <p><strong>Summary:</strong></p>
 
       <p>${lead.conversationSummary || "-"}</p>
+
+      <br/><br/>
+
+      <a
+        href="${process.env.GOOGLE_SHEET_URL}"
+        style="
+          display:inline-block;
+          padding:14px 28px;
+          background:#D4AF37;
+          color:#000000;
+          text-decoration:none;
+          border-radius:8px;
+          font-weight:700;
+          font-size:16px;
+        "
+      >
+        View Lead
+      </a>
     `,
   });
+
   console.log("Resend Result:");
-console.log(result);
+  console.log(result);
 }

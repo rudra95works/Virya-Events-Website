@@ -35,7 +35,7 @@ lead.leadId = leadId;
     const existing =
       await sheets.spreadsheets.values.get({
         spreadsheetId,
-        range: `${sheetName}!A:S`,
+        range: `${sheetName}!A:U`,
       });
 
     const rows = existing.data.values ?? [];
@@ -51,52 +51,92 @@ lead.leadId = leadId;
     }
 
     const now = new Date().toLocaleString();
+    const guidedFlowComplete =
+  !!lead.eventType &&
+  !!lead.eventDate &&
+  !!lead.guests &&
+  !!lead.budget &&
+  !!lead.venue &&
+  Array.isArray(lead.services) &&
+  lead.services.length > 0;
+   
+
+console.log("existingRowIndex =", existingRowIndex);
+console.log("leadId =", lead.leadId);
+
         if (existingRowIndex !== -1) {
 
       const existingRow = rows[existingRowIndex - 1];
+      
 
-      const updatedRow = [
+     const notificationSent =
+  existingRow[19] === "TRUE";
 
-        lead.leadId,
+const updatedRow = [
 
-        existingRow[1] || now,          // Timestamp
-        lead.name || existingRow[2] || "",
-        lead.phone || existingRow[3] || "",
-        lead.email || existingRow[4] || "",
-        lead.eventType || existingRow[5] || "",
-        lead.eventDate || existingRow[6] || "",
-        lead.guests || existingRow[7] || "",
-        lead.budget || existingRow[8] || "",
-        lead.venue || existingRow[9] || "",
+  lead.leadId,
 
-        Array.isArray(lead.services)
-          ? lead.services.join(", ")
-          : existingRow[10] || "",
+  existingRow[1] || now,
+  lead.name || existingRow[2] || "",
+  lead.phone || existingRow[3] || "",
+  lead.email || existingRow[4] || "",
+  lead.eventType || existingRow[5] || "",
+  lead.eventDate || existingRow[6] || "",
+  lead.guests || existingRow[7] || "",
+  lead.budget || existingRow[8] || "",
+  lead.venue || existingRow[9] || "",
 
-        lead.requirements || existingRow[11] || "",
-        lead.conversationSummary || existingRow[12] || "",
+  Array.isArray(lead.services)
+    ? lead.services.join(", ")
+    : existingRow[10] || "",
 
-        now,                            // Last Updated
+  lead.requirements || existingRow[11] || "",
+  lead.conversationSummary || existingRow[12] || "",
 
-        existingRow[14] || "🟢 New",     // Status
-        existingRow[15] || "",          // Assigned To
-        existingRow[16] || "",          // Follow-up Date
-        existingRow[17] || "",          // Estimated Value
-        existingRow[18] || "Website Chatbot", // Source
+  now,
 
-      ];
+  existingRow[14] || "🟢 New",
+  existingRow[15] || "",
+  existingRow[16] || "",
+  existingRow[17] || "",
+  existingRow[18] || "Website Chatbot",
 
-      await sheets.spreadsheets.values.update({
+  notificationSent ? "TRUE" : "FALSE",
 
-        spreadsheetId,
-        range: `${sheetName}!A${existingRowIndex}:S${existingRowIndex}`,
-        valueInputOption: "USER_ENTERED",
+Array.isArray(lead.conversation)
+  ? lead.conversation
+      .map(
+  (m: any) =>
+    `${m.role === "user" ? "User" : "Assistant"}:\n${m.content}`
+)
+      .join("\n\n")
+  : "",
 
-        requestBody: {
-          values: [updatedRow],
-        },
+];
+const updateResult =
+  await sheets.spreadsheets.values.update({
+  spreadsheetId,
+  range: `${sheetName}!A${existingRowIndex}:U${existingRowIndex}`,
+  valueInputOption: "USER_ENTERED",
+  requestBody: {
+    values: [updatedRow],
+  },
+});
+console.log("UPDATE RESULT");
+console.log(updateResult.data);
 
-      });
+if (guidedFlowComplete && !notificationSent) {
+  await sendLeadNotification(lead);
+
+  await sheets.spreadsheets.values.update({
+    spreadsheetId,
+    range: `${sheetName}!T${existingRowIndex}`,
+    valueInputOption: "USER_ENTERED",
+    requestBody: {
+      values: [["TRUE"]],
+    },
+  });
+}
 
     } else {
 
@@ -131,12 +171,24 @@ lead.leadId = leadId;
         "",
         "Website Chatbot",
 
-      ];
+"FALSE",
 
-      await sheets.spreadsheets.values.append({
+Array.isArray(lead.conversation)
+  ? lead.conversation
+      .map(
+  (m: any) =>
+    `${m.role === "user" ? "User" : "Assistant"}:\n${m.content}`
+)
+      .join("\n\n")
+  : "",
+
+];
+
+      const appendResult =
+  await sheets.spreadsheets.values.append({
 
         spreadsheetId,
-        range: `${sheetName}!A:S`,
+        range: `${sheetName}!A:U`,
         valueInputOption: "USER_ENTERED",
 
         requestBody: {
@@ -144,9 +196,13 @@ lead.leadId = leadId;
         },
 
       });
+      console.log("APPEND RESULT");
+console.log(appendResult.data);
+
+      
 
     }
-    await sendLeadNotification(lead);
+    
     
       return NextResponse.json({
   success: true,

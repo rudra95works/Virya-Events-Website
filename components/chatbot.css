@@ -522,6 +522,10 @@ border-color:#D4AF37;
     background:#B68D1D;
 
 }
+.chat-input input::placeholder{
+    font-size:14px;
+    color:#9ca3af;
+}
 
 /* =========================================================
    8. SCROLLBAR
@@ -1095,8 +1099,8 @@ opacity .25s;
     background:#D4AF37;
     color:#111827;
 
-    font-size:18px;
-    font-weight:700;
+    font-size:15px;
+    font-weight:500;
 
     cursor:pointer;
 
@@ -1174,8 +1178,9 @@ opacity .25s;
   border-radius: 12px;
   background: #d9b233;
   color: #111827;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 15px;
+font-weight: 500;
+letter-spacing: 0.2px;
   cursor: pointer;
 }
 
@@ -1223,4 +1228,83 @@ opacity .25s;
 
 .chat-input input{
   flex:1;
+}
+
+
+/* =========================================================
+   Chat Helper Text
+========================================================= */
+
+.chat-helper{
+ font-size: 12px;
+color: #8A8F98;
+line-height: 1.4;
+  margin-bottom:-5px;
+}
+
+/* =========================================================
+   Planning Complete Message
+========================================================= */
+
+.planning-complete{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:20px 0 14px;
+  color:#6b7280;
+  font-size:12px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+
+.planning-complete::before,
+.planning-complete::after{
+  content:"";
+  flex:1;
+  height:1px;
+  background:#e5e7eb;
+}
+
+.planning-complete span{
+  padding:0 12px;
+}
+
+
+/* =========================================================
+   AI Status Indicator
+========================================================= */
+
+.ai-status{
+    margin:14px 0 12px;
+
+    text-align:center;
+
+    font-size:11px;
+    font-weight:600;
+
+    color:#7A7F87;
+
+    letter-spacing:.08em;
+
+    text-transform:uppercase;
+
+    position:relative;
+}
+
+.ai-status::before,
+.ai-status::after{
+
+    content:"";
+
+    display:inline-block;
+
+    width:28px;
+    height:1px;
+
+    background:#D8DDE5;
+
+    vertical-align:middle;
+
+    margin:0 10px;
 }
