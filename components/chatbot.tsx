@@ -58,8 +58,10 @@ const [lead, setLead] = useState<Lead>({
 const [chatMode, setChatMode] = useState<"chat" | "question">("chat");
 
 const [currentQuestion, setCurrentQuestion] = useState("");
+const [currentField, setCurrentField] = useState("");
 
 const [options, setOptions] = useState<string[]>([]);
+const [selectedOption, setSelectedOption] = useState("");
 
   const [showPrompt, setShowPrompt] = useState(false);
 const [promptDismissed, setPromptDismissed] = useState(false);
@@ -126,7 +128,8 @@ function quickSend(text: string) {
 
   async function sendMessage(customMessage?: string) {
 
-  const isSystemRequest = customMessage !== undefined;
+  const isSystemRequest =
+  customMessage === "__SYSTEM_START__";
 
   const userMessage = customMessage ?? message;
 
@@ -154,10 +157,11 @@ function quickSend(text: string) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
+       body: JSON.stringify({
   leadId,
   lead,
   messages: conversation,
+  field: currentField,
 }),
       });
 
@@ -165,7 +169,9 @@ function quickSend(text: string) {
 
 setChatMode(data.mode ?? "chat");
 setCurrentQuestion(data.reply ?? "");
+setCurrentField(data.field ?? "");
 setOptions(data.options ?? []);
+setSelectedOption("");
 
 const updatedLead = {
   ...lead,
@@ -176,6 +182,18 @@ const updatedLead = {
 };
 
 setLead(updatedLead);
+if (leadId) {
+  await fetch("/api/lead", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      leadId,
+      ...updatedLead,
+    }),
+  });
+}
 
 
       setLoading(false);
@@ -265,8 +283,9 @@ sendMessage("__SYSTEM_START__");
   if (!isOpen) {
   return (
     <>
-      {showPrompt && (
-        <div className="chat-invite">
+      {!showLeadForm && chatMode !== "question" && (
+
+<div className="chat-input">
 
           <button
             className="chat-invite-close"
@@ -395,14 +414,24 @@ sendMessage("__SYSTEM_START__");
 
     <div className="lead-form">
 
-      <h3>Let's plan your event</h3>
+     <h3>Let's start planning</h3>
 
-      <p>
-        Enter your details to start chatting with Virya AI.
-      </p>
+<p>
+  We'll guide you through your event in just a few simple steps.
+</p>
 
-      <input
-        placeholder="Your Name *"
+<div className="lead-progress">
+  Step 1 of 6
+</div>
+
+<div className="lead-progress-bar">
+  <div className="lead-progress-fill"></div>
+</div>
+
+      
+
+<input
+  placeholder="Your Name *"
         value={lead.name}
         onChange={(e) =>
           setLead({
@@ -412,8 +441,10 @@ sendMessage("__SYSTEM_START__");
         }
       />
 
-      <input
-        placeholder="Phone Number *"
+      
+
+<input
+  placeholder="Phone Number *"
         value={lead.phone}
         onChange={(e) =>
           setLead({
@@ -423,8 +454,10 @@ sendMessage("__SYSTEM_START__");
         }
       />
 
-      <input
-        placeholder="Email (Optional)"
+      
+
+<input
+  placeholder="Email (Optional)"
         value={lead.email}
         onChange={(e) =>
           setLead({
@@ -437,7 +470,7 @@ sendMessage("__SYSTEM_START__");
       <button
         onClick={startConversation}
       >
-        Continue
+        Continue →
       </button>
 
     </div>
@@ -499,6 +532,37 @@ sendMessage("__SYSTEM_START__");
       )}
 
       <div ref={messagesEndRef} />
+      {!showLeadForm &&
+  chatMode === "question" &&
+  options.length > 0 && (
+
+    <div className="guided-flow">
+
+      <div className="guided-options">
+
+        {options.map((option) => (
+
+          <button
+            key={option}
+            className={`guided-option ${
+  selectedOption === option ? "selected" : ""
+}`}
+            onClick={() => {
+  console.log("Selected option:", option);
+  setSelectedOption(option);
+  sendMessage(option);
+}}
+          >
+            {option}
+          </button>
+
+        ))}
+
+      </div>
+
+    </div>
+
+)}
 
     </>
 
@@ -506,51 +570,13 @@ sendMessage("__SYSTEM_START__");
 
 </div>
 
-{!showLeadForm && chatMode === "question" ? (
 
-  <div className="guided-flow">
 
-  <h3>{currentQuestion}</h3>
+  
 
-  <div className="guided-options">
 
-    {options.map((option) => (
 
-      <button
-        key={option}
-        className="guided-option"
-        onClick={() => sendMessage(option)}
-      >
-        {option}
-      </button>
-
-    ))}
-
-  </div>
-
-</div>
-
-) : !showLeadForm && (
-
-  <div className="chat-input">
-
-    <input
-      value={message}
-      onChange={(e) => setMessage(e.target.value)}
-      onKeyDown={handleKeyDown}
-      placeholder="Ask about your event..."
-    />
-
-    <button
-      onClick={() => sendMessage()}
-      disabled={loading}
-    >
-      {loading ? "..." : "Send"}
-    </button>
-
-  </div>
-
-)}
+ 
 
 </div>
 

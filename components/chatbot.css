@@ -101,7 +101,7 @@
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:18px;
+  padding:14px 18px;
   color:#fff;
   background:linear-gradient(135deg,#111827,#1f2937);
 }
@@ -144,7 +144,7 @@ rgba(212,175,55,.45),
 transparent
 );
 
-margin:10px 0;
+margin:6px 0;
 
 }
 
@@ -171,8 +171,8 @@ margin:10px 0;
 }
 
 .chat-header-avatar{
-    width:50px;
-    height:50px;
+    width:58px;
+height:58px;
 
     object-fit:contain;
     flex-shrink:0;
@@ -320,13 +320,17 @@ margin:10px 0;
 ========================================================= */
 
 .chat-messages{
-  flex:1;
-  overflow-y:auto;
-  padding:18px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  background:#f8fafc;
+    flex:1;
+    overflow-y:auto;
+
+    display:flex;
+    flex-direction:column;
+
+    gap:12px;
+
+    padding:18px;
+
+    background:#f8fafc;
 }
 
 .user-message{
@@ -383,7 +387,7 @@ margin:10px 0;
 
     display:flex;
     align-items:center;
-    justify-content:center;
+   
 
     gap:6px;
 
@@ -749,7 +753,6 @@ border-color:#D4AF37;
 
 .close-btn{
     position:relative;
-    top:-26px;
 }
 
 
@@ -758,20 +761,7 @@ border-color:#D4AF37;
    10. VIRYA AI ORB
 ========================================================= */
 
-.chat-header-avatar{
-    width:50px;
-    height:50px;
 
-    object-fit:contain;
-    flex-shrink:0;
-
-    position:relative;
-    top:-26px;
-
-    filter:drop-shadow(0 8px 16px rgba(0,0,0,.30));
-
-    animation:floatHeader 5s ease-in-out infinite;
-}
 
 @keyframes floatOrb{
 
@@ -955,8 +945,14 @@ border-color:#D4AF37;
 some guideflow 
 
 .guided-flow{
-    padding:18px;
-    border-top:1px solid #ececec;
+    margin-top:10px;
+}
+
+.guided-options{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:12px;
+    width:100%;
 }
 
 .guided-flow h3{
@@ -965,26 +961,60 @@ some guideflow
     font-weight:600;
 }
 
-.guided-options{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
+.guided-option{
+
+    height:60px;
+    width:100%;
+animation:optionFadeIn .25s ease;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:#ffffff;
+
+    border:1px solid #E5E7EB;
+    border-radius:14px;
+
+    color:#111827;
+
+    font-size:15px;
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:all .2s ease;
 }
 
-.guided-option{
-    padding:14px;
-    border-radius:12px;
-    border:1px solid #ddd;
-    background:white;
-    cursor:pointer;
-    transition:.2s;
-    font-size:14px;
-    font-weight:500;
-}
 
 .guided-option:hover{
-    border-color:#d4af37;
-    background:#fffaf0;
+
+    border-color:#D4AF37;
+
+    background:#FFF9EA;
+
+    transform:translateY(-2px);
+
+    box-shadow:0 6px 18px rgba(0,0,0,.08);
+
+}
+
+.guided-option:active{
+
+    transform:scale(.98);
+
+}
+
+.guided-option.selected{
+
+    background:#D4AF37;
+
+    border-color:#D4AF37;
+
+    color:#111827;
+
+    box-shadow:0 8px 20px rgba(212,175,55,.28);
+
 }
 
 /* =========================================================
@@ -994,46 +1024,139 @@ some guideflow
 .lead-form{
     display:flex;
     flex-direction:column;
-    gap:14px;
-    padding:20px;
+    gap:10px;
+
+    padding:10px 22px 20px;
 }
 
 .lead-form h3{
-    margin:0;
+    margin:0 0 6px;
     color:#111827;
-    font-size:22px;
+    font-size:20px;
     font-weight:700;
+    line-height:1.2;
 }
 
 .lead-form p{
-    margin:0 0 6px;
+    margin:0 0 10px;
     color:#6b7280;
-    line-height:1.5;
+    line-height:1.6;
+    font-size:15px;
 }
+
 
 .lead-form input{
     width:100%;
-    height:46px;
-    padding:0 14px;
-    border:1px solid #d1d5db;
-    border-radius:12px;
+    height:50px;
+    padding:0 18px;
+
+    border:1px solid #d9dee8;
+    border-radius:16px;
+
+    background:#ffffff;
+
     font-size:15px;
+    font-weight:500;
+    color:#111827;
+
     outline:none;
-    background:#fff;
     box-sizing:border-box;
+
+    transition:
+background .2s,
+border-color .2s,
+transform .18s,
+box-shadow .2s,
+opacity .25s;
+}
+
+.lead-form input::placeholder{
+    color:#9ca3af;
+    font-weight:400;
 }
 
 .lead-form input:focus{
     border-color:#D4AF37;
-    box-shadow:0 0 0 3px rgba(212,175,55,.15);
+    box-shadow:0 0 0 4px rgba(212,175,55,.12);
+}
+.lead-form input:hover{
+    border-color:#cfd6df;
 }
 
 .lead-form button{
-    height:46px;
+    margin-top:8px;
+    width:100%;
+    height:54px;
+
     border:none;
-    border-radius:12px;
+    border-radius:14px;
+
     background:#D4AF37;
     color:#111827;
+
+    font-size:18px;
     font-weight:700;
+
     cursor:pointer;
+
+    transition:.2s;
+}
+
+.lead-form button:hover{
+    background:#c89d1d;
+    transform:translateY(-1px);
+}
+
+
+.chat-messages:has(.lead-form){
+    justify-content:center;
+}
+
+
+/* =========================================================
+   Lead Progress Bar
+========================================================= */
+
+.lead-progress{
+    font-size:11px;
+    font-weight:600;
+    color:#D4AF37;
+    margin:4px 0;
+    text-transform:uppercase;
+    letter-spacing:.6px;
+}
+
+.lead-progress-bar{
+    width:100%;
+    height:3px;
+    background:#ececec;
+    border-radius:999px;
+    overflow:hidden;
+    margin-bottom:18px;
+}
+
+.lead-progress-fill{
+    width:16%;
+    height:100%;
+    background:#D4AF37;
+    border-radius:999px;
+}
+
+
+
+
+
+
+@keyframes optionFadeIn{
+
+    from{
+        opacity:0;
+        transform:translateY(8px);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+
 }

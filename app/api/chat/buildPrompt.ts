@@ -11,7 +11,17 @@ import { LEAD } from "./knowledge/lead";
 import { POLICIES } from "./knowledge/policies";
 import { VOICE } from "./knowledge/voice";
 
-export function buildPrompt(userMessage: string) {
+export function buildPrompt(
+  userMessage: string,
+  lead?: {
+    eventType: string;
+    guests: string;
+    budget: string;
+  }
+) {
+
+
+
   const message = userMessage.toLowerCase();
 
   const knowledge = [
@@ -97,8 +107,20 @@ export function buildPrompt(userMessage: string) {
     knowledge.push(FAQ);
   }
 
+  const leadContext = lead
+  ? `
+Current Lead Information:
+
+Event Type: ${lead.eventType || "Not collected"}
+Guests: ${lead.guests || "Not collected"}
+Budget: ${lead.budget || "Not collected"}
+`
+  : "";
+
   return `
 ${SYSTEM_PROMPT}
+
+${leadContext}
 
 ${knowledge.join("\n\n")}
 `;

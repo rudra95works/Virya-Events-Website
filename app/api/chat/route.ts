@@ -32,17 +32,52 @@ const guidedFlow = [
     ],
 
   },
-  {
-    field: "budget",
-    question: "What's your approximate event budget?",
-    options: [
-      "Under ₹1 Lakh",
-      "₹1–3 Lakhs",
-      "₹3–5 Lakhs",
-      "₹5 Lakhs+",
-    ],
-  },
+    {
+  field: "budget",
+  question: "What's your approximate event budget?",
+  options: [
+    "Under ₹1 Lakh",
+    "₹1–3 Lakhs",
+    "₹3–5 Lakhs",
+    "₹5 Lakhs+",
+  ],
+},
+{
+  field: "eventDate",
+  question: "When is your event?",
+  options: [
+    "Within 7 days",
+    "This Month",
+    "Next Month",
+    "More than 1 Month Away",
+  ],
+},
 ];
+
+function getNextQuestion(lead: {
+  eventType: string;
+  guests: string;
+  budget: string;
+  eventDate: string;
+}) {
+  if (!lead.eventType) {
+    return guidedFlow[0];
+  }
+
+  if (!lead.guests) {
+    return guidedFlow[1];
+  }
+
+ if (!lead.budget) {
+  return guidedFlow[2];
+}
+
+if (!lead.eventDate) {
+  return guidedFlow[3];
+}
+
+return null;
+}
 
 export async function POST(req: Request) {
   try {
@@ -50,6 +85,7 @@ export async function POST(req: Request) {
   leadId,
   lead,
   messages,
+  field,
 }: {
   leadId: string;
   lead: {
@@ -66,7 +102,9 @@ export async function POST(req: Request) {
     conversationSummary: string;
   };
   messages: ChatMessage[];
+field: string;
 } = await req.json();
+console.log("Lead received:", lead);
 
     const recentMessages = messages.slice(-8);
 
@@ -80,105 +118,45 @@ Update the lead from the latest guided answer
 */
 
 if (
-  !lead.eventType &&
-  guidedFlow[0].options.includes(latestMessage)
+  latestMessage !== "__SYSTEM_START__" &&
+  latestMessage !== ""
 ) {
-  lead.eventType = latestMessage;
-}
-
-if (
-  !lead.guests &&
-  guidedFlow[1].options.includes(latestMessage)
+  if (
+  field &&
+  latestMessage !== "__SYSTEM_START__"
 ) {
-  lead.guests = latestMessage;
+  (lead as Record<string, unknown>)[field] = latestMessage;
 }
-
-if (
-  !lead.budget &&
-  guidedFlow[2].options.includes(latestMessage)
-) {
-  lead.budget = latestMessage;
 }
-
 /*
 --------------------------------------------------
 Now determine what's still missing
 --------------------------------------------------
 */
 
-const needsEventType = !lead.eventType;
+const nextQuestion = getNextQuestion(lead);
 
-const needsGuests = !lead.guests;
-const needsBudget = !lead.budget;
-
-    if (needsEventType) {
-
-  const firstQuestion = guidedFlow[0];
-
+if (nextQuestion) {
   return NextResponse.json({
-
-    reply: firstQuestion.question,
-
-    mode: "question",
-
-    field: firstQuestion.field,
-
-    options: firstQuestion.options,
-
-    leadUpdate: lead,
-
-    conversationSummary: "",
-
-  });
-
-}
-
-if (needsGuests && lead.eventType) {
-
-  const nextQuestion = guidedFlow[1];
-
-  return NextResponse.json({
-
     reply: nextQuestion.question,
-
     mode: "question",
-
     field: nextQuestion.field,
-
-    leadUpdate: lead,
-
     options: nextQuestion.options,
-
+    leadUpdate: lead,
     conversationSummary: "",
-
   });
-
 }
 
-if (needsBudget && lead.guests) {
+// All guided questions completed
+lead.conversationSummary =
+  lead.conversationSummary || "Guided onboarding completed.";
 
-  const nextQuestion = guidedFlow[2];
+const systemPrompt = buildPrompt(
+  `${latestMessage}
 
-  return NextResponse.json({
-
-    reply: nextQuestion.question,
-
-    mode: "question",
-
-    field: nextQuestion.field,
-
-    leadUpdate: lead,
-
-    options: nextQuestion.options,
-
-    conversationSummary: "",
-
-  });
-
-}
-
-
-    const systemPrompt = buildPrompt(latestMessage);
+Lead Information:
+${JSON.stringify(lead, null, 2)}`
+);
 
     const chatCompletion = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
@@ -203,8 +181,10 @@ if (needsBudget && lead.guests) {
       parsed.reply ||
       "Sorry, I couldn't generate a response.";
 
-    const leadUpdate =
-      parsed.leadUpdate || {};
+    const leadUpdate = {
+  ...lead,
+  ...(parsed.leadUpdate || {}),
+};
 
     const conversationSummary =
       parsed.conversationSummary || "";
