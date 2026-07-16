@@ -76,11 +76,6 @@ const guidedFlow = [
     "Venue Assistance",
   ],
 },
-{
-  field: "requirements",
-  question: "Anything else you'd like us to know about your event?",
-  options: [],
-},
 ];
 
 function getNextQuestion(lead: {
@@ -114,10 +109,6 @@ if (!lead.venue) {
 
 if (!lead.services.length) {
   return guidedFlow[5];
-}
-
-if (!lead.requirements) {
-  return guidedFlow[6];
 }
 
 return null;
@@ -201,12 +192,33 @@ conversationSummary: "",
 lead.conversationSummary =
   lead.conversationSummary || "Guided onboarding completed.";
 
-const systemPrompt = buildPrompt(
-  `${latestMessage}
+  return NextResponse.json({
+  reply:
+    "Perfect! I have the basic details of your event. Ask me anything about your event, or share any additional requirements you'd like us to know.",
+  mode: "chat",
+  leadUpdate: lead,
+  options: [],
+});
 
-Lead Information:
-${JSON.stringify(lead, null, 2)}`
-);
+
+
+const systemPrompt = buildPrompt(`
+Current Lead Information
+
+Name: ${lead.name}
+Phone: ${lead.phone}
+Email: ${lead.email}
+
+Event Type: ${lead.eventType}
+Guests: ${lead.guests}
+Budget: ${lead.budget}
+Event Date: ${lead.eventDate}
+Venue: ${lead.venue}
+Services: ${lead.services.join(", ")}
+
+Latest User Message:
+${latestMessage}
+`);
 
     const chatCompletion = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",

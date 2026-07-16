@@ -533,29 +533,14 @@ sendMessage("__SYSTEM_START__");
       )}
 
       <div ref={messagesEndRef} />
-      {!showLeadForm &&
+
+{!showLeadForm &&
 chatMode === "question" &&
-currentField !== "requirements" ? (
+options.length > 0 && (
 
-  currentField === "requirements" ? (
+  <div className="guided-flow">
 
-    <div className="requirements-box">
-
-      <h3>
-        Anything else you'd like us to know about your event?
-      </h3>
-
-      <p>
-        This helps us personalise our recommendations.
-      </p>
-
-    </div>
-
-  ) : options.length > 0 ? (
-
-    <div className="guided-flow">
-
-      <div className="guided-options">
+    <div className="guided-options">
 
         {options.map((option) => (
 
@@ -611,9 +596,7 @@ currentField !== "requirements" ? (
 
     </div>
 
-  ) : null
-
-) : null}
+  )}
 
     </>
 
@@ -621,22 +604,11 @@ currentField !== "requirements" ? (
 
 </div>
 
-{!showLeadForm && (
+{!showLeadForm &&
+chatMode === "chat" && (
 
   <div className="chat-footer">
 
-    {chatMode === "question" &&
-      currentField === "requirements" && (
-
-      <div className="requirements-box">
-
-  <p>
-    Tell us anything else about your event and press Send.
-  </p>
-
-</div>
-
-    )}
 
     <div className="chat-input">
 
@@ -644,11 +616,7 @@ currentField !== "requirements" ? (
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder={
-          currentField === "requirements"
-            ? "Tell us anything else about your event..."
-            : "Ask Virya AI anything..."
-        }
+        placeholder="Ask about your event or share any additional requirements..."
       />
 
       <button
