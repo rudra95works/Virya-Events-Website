@@ -615,55 +615,54 @@ currentField !== "requirements" ? (
 
 ) : null}
 
-{!showLeadForm &&
-chatMode === "question" &&
-currentField === "requirements" && (
-
-  <div className="chat-input">
-
-    <div className="requirements-box">
-
-      <h3>
-        Anything else you'd like us to know about your event?
-      </h3>
-
-      <p>
-        This helps us personalise our recommendations.
-      </p>
-
-    </div>
-
-    <input
-      value={message}
-      onChange={(e) => setMessage(e.target.value)}
-      onKeyDown={handleKeyDown}
-      placeholder="Tell us anything else about your event..."
-    />
-
-    <button
-      onClick={() => sendMessage()}
-      disabled={loading}
-    >
-      {loading ? "..." : "Send"}
-    </button>
-
-  </div>
-
-)}
-
     </>
 
   )}
 
 </div>
 
+{!showLeadForm && (
 
+  <div className="chat-footer">
 
-  
+    {chatMode === "question" &&
+      currentField === "requirements" && (
 
+      <div className="requirements-box">
 
+  <p>
+    Tell us anything else about your event and press Send.
+  </p>
 
- 
+</div>
+
+    )}
+
+    <div className="chat-input">
+
+      <input
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        onKeyDown={handleKeyDown}
+        placeholder={
+          currentField === "requirements"
+            ? "Tell us anything else about your event..."
+            : "Ask Virya AI anything..."
+        }
+      />
+
+      <button
+        onClick={() => sendMessage()}
+        disabled={loading}
+      >
+        Send
+      </button>
+
+    </div>
+
+  </div>
+
+)}
 
 </div>
 
