@@ -71,6 +71,21 @@ const [chatMode, setChatMode] = useState<"chat" | "question" | "completed">("cha
 
 const [currentQuestion, setCurrentQuestion] = useState("");
 const [currentField, setCurrentField] = useState("");
+const answeredQuestions = [
+  lead.eventType,
+  lead.guests,
+  lead.budget,
+  lead.eventDate,
+  lead.venue,
+  lead.services.length > 0,
+].filter(Boolean).length;
+
+const totalQuestions = 6;
+
+const currentStep = Math.min(answeredQuestions + 1, totalQuestions);
+
+const progressPercent =
+  (answeredQuestions / totalQuestions) * 100;
 
 const [options, setOptions] = useState<string[]>([]);
 const [selectedOption, setSelectedOption] = useState("");
@@ -185,9 +200,20 @@ function quickSend(text: string) {
       const data = await res.json();
 
 setChatMode(data.mode ?? "chat");
+if (data.mode === "completed") {
+  setCurrentField("");
+}
 setCurrentQuestion(data.reply ?? "");
-setCurrentField(data.field ?? "");
-setOptions(data.options ?? []);
+if (data.mode === "question") {
+  setCurrentField(data.field || "");
+} else {
+  setCurrentField("");
+}
+setOptions(
+  data.mode === "question"
+    ? (data.options || [])
+    : []
+);
 setSelectedOption("");
 
       setLoading(false);
@@ -425,6 +451,7 @@ async function startConversation() {
     </span>
 
   </div>
+  
 
   <a
   href="https://wa.me/91YOURNUMBER"
@@ -450,6 +477,23 @@ async function startConversation() {
 
 </div>
 
+{chatMode === "question" && currentStep <= 6 && (
+  <div className="chat-progress-wrapper">
+    <div className="chat-progress-text">
+      Step {currentStep} of 6 • {Math.round(progressPercent)}% Complete
+    </div>
+
+    <div className="chat-progress-bar">
+      <div
+        className="chat-progress-fill"
+        style={{
+          width: `${progressPercent}%`,
+        }}
+      />
+    </div>
+  </div>
+)}
+
 <div className="chat-messages">
 
   {showLeadForm ? (
@@ -462,15 +506,6 @@ async function startConversation() {
   We'll guide you through your event in just a few simple steps.
 </p>
 
-<div className="lead-progress">
-  Step 1 of 6
-</div>
-
-<div className="lead-progress-bar">
-  <div className="lead-progress-fill"></div>
-</div>
-
-      
 
 <input
   placeholder="Your Name *"
@@ -588,6 +623,7 @@ async function startConversation() {
       )}
 
       <div ref={messagesEndRef} />
+
 
 {!showLeadForm &&
 chatMode === "question" &&

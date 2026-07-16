@@ -145,7 +145,7 @@ field: string;
 } = await req.json();
 console.log("Lead received:", lead);
 
-    const recentMessages = messages.slice(-8);
+    const recentMessages = messages;
 
     const latestMessage =
   recentMessages[recentMessages.length - 1]?.content ?? "";
@@ -166,7 +166,10 @@ if (
 ) {
 
   if (field === "services") {
-    lead.services = [latestMessage];
+    lead.services = latestMessage
+  .split(",")
+  .map(s => s.trim())
+  .filter(Boolean);
   } else {
     (lead as Record<string, unknown>)[field] = latestMessage;
   }
@@ -194,7 +197,7 @@ conversationSummary: "",
 
 // All guided questions completed
 
-if (messages.length <= guidedFlow.length * 2) {
+if (field === "services") {
 
   lead.conversationSummary =
     lead.conversationSummary || "Guided onboarding completed.";
@@ -264,10 +267,21 @@ ${latestMessage}
       parsed.reply ||
       "Sorry, I couldn't generate a response.";
 
-    const leadUpdate = {
+    const aiLeadUpdate = parsed.leadUpdate || {};
+
+const leadUpdate = {
   ...lead,
-  ...(parsed.leadUpdate || {}),
 };
+
+for (const [key, value] of Object.entries(aiLeadUpdate)) {
+  if (
+    value !== "" &&
+    value !== null &&
+    value !== undefined
+  ) {
+    (leadUpdate as any)[key] = value;
+  }
+}
 
     const conversationSummary =
       parsed.conversationSummary || "";
