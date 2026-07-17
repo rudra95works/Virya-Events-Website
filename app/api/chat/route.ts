@@ -91,22 +91,22 @@ function getNextQuestion(lead: {
 requirements: string;
 }) {
   if (!lead.eventType) {
-    return guidedFlow[0];
-  }
-
-  if (!lead.guests) {
-    return guidedFlow[1];
-  }
-
- if (!lead.budget) {
-  return guidedFlow[2];
+  return guidedFlow[0];
 }
 
 if (!lead.eventDate) {
-  return guidedFlow[3];
+  return guidedFlow[1];
+}
+
+if (!lead.guests) {
+  return guidedFlow[2];
 }
 
 if (!lead.venue) {
+  return guidedFlow[3];
+}
+
+if (!lead.budget) {
   return guidedFlow[4];
 }
 
