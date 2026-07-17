@@ -700,15 +700,17 @@ function resetConversation() {
 
 <div className="chat-header-actions">
 
-  <button
-    className={`menu-btn ${showMenu ? "active" : ""}`}
-    onClick={(e) => {
-  e.stopPropagation();
-  setShowMenu(!showMenu);
-}}
-  >
-    ⋮
-  </button>
+  {!showLeadForm && (
+    <button
+      className={`menu-btn ${showMenu ? "active" : ""}`}
+      onClick={(e) => {
+        e.stopPropagation();
+        setShowMenu(!showMenu);
+      }}
+    >
+      ⋮
+    </button>
+  )}
 
   <button
     className="close-btn"
