@@ -6,8 +6,9 @@ import "./chatbot.css";
 type Message = {
   role: "user" | "assistant";
   content: string;
+  timestamp?: string;
+  images?: string[];
 };
-
 type Lead = {
   name: string;
   phone: string;
@@ -31,7 +32,11 @@ type Lead = {
 };
 export default function ChatBot() {
 
+  const STORAGE_KEY = "virya-chat";
+
   const [message, setMessage] = useState("");
+
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
 
   const [messages, setMessages] = useState<Message[]>([]);
 
@@ -91,17 +96,90 @@ const [options, setOptions] = useState<string[]>([]);
 const [selectedOption, setSelectedOption] = useState("");
 const [selectedServices, setSelectedServices] = useState<string[]>([]);
 
-  const [showPrompt, setShowPrompt] = useState(false);
-  const [startingChat, setStartingChat] = useState(false);
+ const [showPrompt, setShowPrompt] = useState(false);
+const [startingChat, setStartingChat] = useState(false);
 const [promptDismissed, setPromptDismissed] = useState(false);
 
+const [showMenu, setShowMenu] = useState(false);
+
+console.log({
+  showPrompt,
+  showLeadForm,
+  isOpen,
+  promptDismissed,
+  chatMode,
+});
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
 useEffect(() => {
   messagesEndRef.current?.scrollIntoView({
     behavior: "smooth",
   });
 }, [messages, loading]);
+
+useEffect(() => {
+  const saved = localStorage.getItem(STORAGE_KEY);
+
+  if (!saved) return;
+
+  try {
+    const data = JSON.parse(saved);
+
+    if (data.lead) setLead(data.lead);
+    if (data.messages) setMessages(data.messages);
+    if (data.leadId) setLeadId(data.leadId);
+
+    setChatMode(data.chatMode ?? "chat");
+
+setCurrentField(data.currentField ?? "");
+setCurrentQuestion(data.currentQuestion ?? "");
+setOptions(data.options ?? []);
+
+setShowLeadForm(data.showLeadForm ?? true);
+
+setSelectedServices(data.selectedServices ?? []);
+
+setPromptDismissed(data.promptDismissed ?? false);
+
+setIsOpen(data.isOpen ?? false);
+
+  } catch (err) {
+    console.error("Failed to restore chat:", err);
+  }
+}, []);
+
+useEffect(() => {
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify({
+  lead,
+  messages,
+  leadId,
+  chatMode,
+
+  currentField,
+  currentQuestion,
+  options,
+
+  showLeadForm,
+  selectedServices,
+  promptDismissed,
+  isOpen,
+})
+  );
+}, [
+  lead,
+  messages,
+  leadId,
+  chatMode,
+  showLeadForm,
+  selectedServices,
+  promptDismissed,
+  isOpen,
+]);
 
 
 
@@ -114,6 +192,24 @@ useEffect(() => {
 
   return () => clearTimeout(timer);
 }, [isOpen, promptDismissed]);
+
+useEffect(() => {
+
+  function closeMenu() {
+    setShowMenu(false);
+  }
+
+  if (showMenu) {
+    document.addEventListener("click", closeMenu);
+  }
+
+  return () =>
+    document.removeEventListener(
+      "click",
+      closeMenu
+    );
+
+}, [showMenu]);
 
 
 function quickSend(text: string) {
@@ -130,9 +226,10 @@ function quickSend(text: string) {
     setMessages((prev) => [
       ...prev,
       {
-        role: "assistant",
-        content: "",
-      },
+  role: "assistant",
+  content: "",
+  timestamp: new Date().toISOString(),
+},
     ]);
 
     for (let i = 0; i < text.length; i++) {
@@ -141,10 +238,10 @@ function quickSend(text: string) {
       setMessages((prev) => {
         const updated = [...prev];
 
-        updated[updated.length - 1] = {
-          role: "assistant",
-          content: current,
-        };
+       updated[updated.length - 1] = {
+  ...updated[updated.length - 1],
+  content: current,
+};
 
         return updated;
       });
@@ -155,128 +252,188 @@ function quickSend(text: string) {
     }
   }
 
-  async function sendMessage(
+  async function uploadImages() {
+  if (selectedImages.length === 0) return [];
+
+  const formData = new FormData();
+
+  selectedImages.forEach((image) => {
+    formData.append("images", image);
+  });
+
+  const res = await fetch("/api/upload", {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!res.ok) {
+  const text = await res.text();
+  console.error("Upload API response:", text);
+  throw new Error(`Image upload failed (${res.status})`);
+}
+
+  const data = await res.json();
+
+  return data.images;
+}
+
+async function sendMessage(
   customMessage?: string,
   leadOverride?: Lead
 ) {
-
   const isSystemRequest =
-  customMessage === "__SYSTEM_START__";
+    customMessage === "__SYSTEM_START__";
 
   const userMessage = customMessage ?? message;
+  const imagePreviews = selectedImages.map((file) =>
+  URL.createObjectURL(file)
+);
 
-  if (!isSystemRequest && !userMessage.trim()) return;
 
-    const conversation: Message[] = isSystemRequest
+  if (!isSystemRequest && !userMessage.trim() && selectedImages.length === 0)
+    return;
+
+  const conversation: Message[] = isSystemRequest
   ? [...messages]
   : [
       ...messages,
-      {
-        role: "user",
-        content: userMessage,
-      },
+     {
+  role: "user",
+  content: userMessage,
+  timestamp: new Date().toISOString(),
+  images: imagePreviews,
+},
     ];
 
-    setMessages(conversation);
+  setMessages(conversation);
 
-    setMessage("");
-    setLoading(true);
+  setMessage("");
+  setLoading(true);
 
-    try {
+  try {
+    
+const uploadedImages = await uploadImages();
 
-      const res = await fetch("/api/chat", {
+// Upload completed successfully.
+// Clear the selection immediately.
+setSelectedImages([]);
+
+const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        leadId,
+        lead: leadOverride ?? lead,
+        messages: conversation,
+        field: currentField,
+        uploadedImages,
+      }),
+    });
+
+    const data = await res.json();
+
+    setChatMode(data.mode ?? "chat");
+
+    if (data.mode === "completed") {
+      setCurrentField("");
+    }
+
+    setCurrentQuestion(data.reply ?? "");
+
+    if (data.mode === "question") {
+      setCurrentField(data.field || "");
+    } else {
+      setCurrentField("");
+    }
+
+    setOptions(
+      data.mode === "question"
+        ? data.options || []
+        : []
+    );
+
+    setSelectedOption("");
+
+    setLoading(false);
+
+    await typeMessage(
+      data.reply ??
+        "Sorry, I couldn't generate a response."
+    );
+
+    const updatedLead = {
+      ...lead,
+      ...data.leadUpdate,
+
+      conversationSummary:
+        data.conversationSummary ??
+        lead.conversationSummary,
+
+      conversation:
+        data.mode === "chat"
+          ? [
+              ...(lead.conversation ?? []),
+              
+                {
+  role: "user",
+  content: userMessage,
+  timestamp: new Date().toISOString(),
+  images: imagePreviews,
+},
+              {
+                role: "assistant",
+                content:
+                  data.reply ??
+                  "Sorry, I couldn't generate a response.",
+                timestamp: new Date().toISOString(),
+              },
+            ]
+          : lead.conversation,
+    };
+
+    setLead(updatedLead);
+
+    if (leadId) {
+      await fetch("/api/lead", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-       body: JSON.stringify({
-  leadId,
-  lead: leadOverride ?? lead,
-  messages: conversation,
-  field: currentField,
-}),
+        body: JSON.stringify({
+          leadId,
+          ...updatedLead,
+          uploadedImages,
+        }),
       });
-
-      const data = await res.json();
-
-setChatMode(data.mode ?? "chat");
-if (data.mode === "completed") {
-  setCurrentField("");
-}
-setCurrentQuestion(data.reply ?? "");
-if (data.mode === "question") {
-  setCurrentField(data.field || "");
-} else {
-  setCurrentField("");
-}
-setOptions(
-  data.mode === "question"
-    ? (data.options || [])
-    : []
-);
-setSelectedOption("");
-
-      setLoading(false);
-
-      await typeMessage(
-        data.reply ??
-          "Sorry, I couldn't generate a response."
-      );
-
-      const updatedLead = {
-  ...lead,
-  ...data.leadUpdate,
-
-  conversationSummary:
-    data.conversationSummary ??
-    lead.conversationSummary,
-
-  conversation:
-  data.mode === "chat"
-    ? [
-        ...(lead.conversation ?? []),
-        {
-          role: "user",
-          content: userMessage,
-        },
-        {
-          role: "assistant",
-          content:
-            data.reply ??
-            "Sorry, I couldn't generate a response.",
-        },
-      ]
-    : lead.conversation,
-};
-
-setLead(updatedLead);
-if (leadId) {
-  await fetch("/api/lead", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      leadId,
-      ...updatedLead,
-    }),
-  });
-}
-
-    } catch {
-
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content:
-            "Sorry, something went wrong.",
-        },
-      ]);
-
-      setLoading(false);
     }
+
+    setSelectedImages([]);
+
+ } catch (error) {
+
+  console.error("SEND MESSAGE ERROR:", error);
+
+  if (error instanceof Error) {
+    console.error(error.stack);
   }
+
+  setMessages((prev) => [
+    ...prev,
+    {
+      role: "assistant",
+      content:
+        error instanceof Error
+          ? `Error: ${error.message}`
+          : "Sorry, something went wrong.",
+      timestamp: new Date().toISOString(),
+    },
+  ]);
+
+  setLoading(false);
+}
+}
 
   function handleKeyDown(
     e: React.KeyboardEvent<HTMLInputElement>
@@ -285,6 +442,33 @@ if (leadId) {
       sendMessage();
     }
   }
+
+ function handleImageUpload(
+  e: React.ChangeEvent<HTMLInputElement>
+) {
+  console.log("🔥 handleImageUpload fired");
+
+  const files = e.target.files;
+
+  console.log("Files:", files);
+
+  if (!files || files.length === 0) {
+    console.log("No files selected");
+    return;
+  }
+
+  const newFiles = Array.from(files);
+
+  console.log("Adding:", newFiles);
+
+  setSelectedImages((prev) => {
+    const updated = [...prev, ...newFiles];
+    console.log("Updated selectedImages:", updated);
+    return updated;
+  });
+
+  e.target.value = "";
+}
 
  async function submitLead() {
   try {
@@ -348,12 +532,51 @@ async function startConversation() {
   setStartingChat(false);
 }
 
+function resetConversation() {
+  localStorage.removeItem(STORAGE_KEY);
+
+  setMessage("");
+  setMessages([]);
+
+  setLeadId("");
+
+  setLead({
+    name: "",
+    phone: "",
+    email: "",
+
+    eventType: "",
+    eventDate: "",
+    guests: "",
+    venue: "",
+    budget: "",
+
+    services: [],
+
+    requirements: "",
+    conversationSummary: "",
+    conversation: [],
+    notificationSent: false,
+  });
+
+  setChatMode("chat");
+
+  setCurrentQuestion("");
+  setCurrentField("");
+
+  setOptions([]);
+  setSelectedOption("");
+  setSelectedServices([]);
+
+  setShowLeadForm(true);
+}
+
   if (!isOpen) {
   return (
     <>
-      {!showLeadForm && chatMode !== "question" && (
+      {showPrompt && !isOpen && !promptDismissed && (
 
-<div className="chat-input">
+<div className="chat-invite">
 
           <button
             className="chat-invite-close"
@@ -468,12 +691,50 @@ async function startConversation() {
 
 </div>
 
-<button
-  className="close-btn"
-  onClick={() => setIsOpen(false)}
->
-  ✕
-</button>
+<div className="chat-header-actions">
+
+  <button
+    className={`menu-btn ${showMenu ? "active" : ""}`}
+    onClick={(e) => {
+  e.stopPropagation();
+  setShowMenu(!showMenu);
+}}
+  >
+    ⋮
+  </button>
+
+  <button
+    className="close-btn"
+    onClick={() => {
+      setShowMenu(false);
+      setIsOpen(false);
+    }}
+  >
+    ✕
+  </button>
+
+  {showMenu && (
+    <div className="chat-menu">
+
+      <button
+        className="chat-menu-item"
+        onClick={() => {
+          setShowMenu(false);
+          resetConversation();
+        }}
+      >
+        <strong>Planning another event?</strong>
+
+        <span>
+          Start fresh and plan a new celebration.
+        </span>
+
+      </button>
+
+    </div>
+  )}
+
+</div>
 
 </div>
 
@@ -536,7 +797,7 @@ async function startConversation() {
       
 
 <input
-  placeholder="Email (Optional)"
+  placeholder="Email for Event Updates (Optional)"
         value={lead.email}
         onChange={(e) =>
           setLead({
@@ -577,6 +838,7 @@ async function startConversation() {
             />
 
             <div className="assistant-message">
+
   {msg.content.split("Requirements Analyzed").map((part, index, array) => (
     <span key={index}>
       {part}
@@ -587,6 +849,17 @@ async function startConversation() {
       )}
     </span>
   ))}
+
+  {msg.timestamp && (
+    <div className="message-time">
+      {new Date(msg.timestamp).toLocaleTimeString("en-IN", {
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: true,
+})}
+    </div>
+  )}
+
 </div>
 
           </div>
@@ -594,11 +867,36 @@ async function startConversation() {
         ) : (
 
           <div
-            key={index}
-            className="user-message"
-          >
-            {msg.content}
-          </div>
+  key={index}
+  className="user-message"
+>
+
+  {msg.images?.length ? (
+    <div className="chat-image-grid">
+      {msg.images.map((src, i) => (
+        <img
+          key={i}
+          src={src}
+          alt=""
+          className="chat-image"
+        />
+      ))}
+    </div>
+  ) : null}
+
+  {msg.content}
+
+  {msg.timestamp && (
+    <div className="message-time">
+      {new Date(msg.timestamp).toLocaleTimeString("en-IN", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      })}
+    </div>
+  )}
+
+</div>
 
         )
 
@@ -706,34 +1004,90 @@ setSelectedServices([]);
   )}
 
 </div>
-
 {!showLeadForm &&
 (chatMode === "chat" || chatMode === "completed") && (
 
   <div className="chat-footer">
 
     <p className="chat-helper">
-  Ask anything about your event or tell us any additional requirements so we can provide the most suitable recommendations.
-</p>
+      Ask anything about your event or tell us any additional requirements so we can provide the most suitable recommendations.
+    </p>
 
+<input
+  ref={fileInputRef}
+  type="file"
+  accept="image/*"
+  multiple
+  style={{ display: "none" }}
+  onChange={handleImageUpload}
+/>
 
-    <div className="chat-input">
-
-      <input
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder="Tell us more about the event..."
-      />
-
-      <button
-        onClick={() => sendMessage()}
-        disabled={loading}
-      >
-        Send
-      </button>
-
+{selectedImages.length > 0 && (
+  <>
+    <div className="image-count">
+      {selectedImages.length}{" "}
+      {selectedImages.length === 1
+        ? "inspiration image selected"
+        : "inspiration images selected"}
     </div>
+
+    <div className="image-preview-row">
+      {selectedImages.map((file, index) => (
+        <div className="image-preview-wrapper" key={index}>
+
+          <button
+            className="remove-image"
+            onClick={() =>
+              setSelectedImages((prev) =>
+                prev.filter((_, i) => i !== index)
+              )
+            }
+          >
+            ×
+          </button>
+
+          <img
+            src={URL.createObjectURL(file as Blob)}
+onError={(e) => console.error("Image preview failed", e)}
+            alt={file.name}
+            className="image-preview"
+          />
+
+        </div>
+      ))}
+    </div>
+  </>
+)}
+
+   <div className="chat-input">
+
+  <div className="input-wrapper">
+
+    <button
+      type="button"
+      className="upload-btn"
+      onClick={() => fileInputRef.current?.click()}
+    >
+      +
+    </button>
+
+    <input
+      value={message}
+      onChange={(e) => setMessage(e.target.value)}
+      onKeyDown={handleKeyDown}
+      placeholder="Tell us more about the event..."
+    />
+
+  </div>
+
+  <button
+    onClick={() => sendMessage()}
+    disabled={loading}
+  >
+    Send
+  </button>
+
+</div>
 
   </div>
 
@@ -743,8 +1097,3 @@ setSelectedServices([]);
 
 );
 }
-
-<div className="planning-complete">
-  <span>✓ Planning Complete</span>
-</div>
-

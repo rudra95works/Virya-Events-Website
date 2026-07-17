@@ -7,6 +7,10 @@ export async function POST(req: Request) {
   try {
     const lead = await req.json();
 
+const uploadedImages = Array.isArray(lead.uploadedImages)
+  ? lead.uploadedImages
+  : [];
+
     const leadId =
   lead.leadId || crypto.randomUUID();
 
@@ -35,7 +39,7 @@ lead.leadId = leadId;
     const existing =
       await sheets.spreadsheets.values.get({
         spreadsheetId,
-        range: `${sheetName}!A:U`,
+        range: `${sheetName}!A:V`,
       });
 
     const rows = existing.data.values ?? [];
@@ -75,48 +79,57 @@ console.log("leadId =", lead.leadId);
 const updatedRow = [
 
   lead.leadId,
+  now,
 
-  existingRow[1] || now,
-  lead.name || existingRow[2] || "",
-  lead.phone || existingRow[3] || "",
-  lead.email || existingRow[4] || "",
-  lead.eventType || existingRow[5] || "",
-  lead.eventDate || existingRow[6] || "",
-  lead.guests || existingRow[7] || "",
-  lead.budget || existingRow[8] || "",
-  lead.venue || existingRow[9] || "",
+  lead.name || "",
+  lead.phone || "",
+  lead.email || "",
+
+  lead.eventType || "",
+  lead.eventDate || "",
+  lead.guests || "",
+
+  lead.budget || "",
+  lead.venue || "",
 
   Array.isArray(lead.services)
     ? lead.services.join(", ")
-    : existingRow[10] || "",
+    : "",
 
-  lead.requirements || existingRow[11] || "",
-  lead.conversationSummary || existingRow[12] || "",
+  lead.requirements || "",
+  lead.conversationSummary || "",
 
   now,
 
-  existingRow[14] || "🟢 New",
-  existingRow[15] || "",
-  existingRow[16] || "",
-  existingRow[17] || "",
-  existingRow[18] || "Website Chatbot",
+  "🟢 New",
+  "",
+  "",
+  "",
+  "Website Chatbot",
 
-  notificationSent ? "TRUE" : "FALSE",
+  "FALSE",
 
-Array.isArray(lead.conversation)
-  ? lead.conversation
-      .map(
-  (m: any) =>
-    `${m.role === "user" ? "User" : "Assistant"}:\n${m.content}`
-)
-      .join("\n\n")
-  : "",
+  Array.isArray(lead.conversation)
+    ? lead.conversation
+        .map(
+          (m: any) =>
+            `${m.role === "user" ? "User" : "Assistant"}:\n${m.content}`
+        )
+        .join("\n\n")
+    : "",
+
+  [
+  existingRow[21] || "",
+  ...uploadedImages.map((img: any) => img.url),
+]
+  .filter(Boolean)
+  .join("\n"),
 
 ];
 const updateResult =
   await sheets.spreadsheets.values.update({
   spreadsheetId,
-  range: `${sheetName}!A${existingRowIndex}:U${existingRowIndex}`,
+  range: `${sheetName}!A${existingRowIndex}:V${existingRowIndex}`,
   valueInputOption: "USER_ENTERED",
   requestBody: {
     values: [updatedRow],
@@ -142,45 +155,49 @@ if (guidedFlowComplete && !notificationSent) {
 
       const newRow = [
 
-        lead.leadId,
-        now,
+  lead.leadId,
+  now,
 
-        lead.name || "",
-        lead.phone || "",
-        lead.email || "",
+  lead.name || "",
+  lead.phone || "",
+  lead.email || "",
 
-        lead.eventType || "",
-        lead.eventDate || "",
-        lead.guests || "",
+  lead.eventType || "",
+  lead.eventDate || "",
+  lead.guests || "",
 
-        lead.budget || "",
-        lead.venue || "",
+  lead.budget || "",
+  lead.venue || "",
 
-        Array.isArray(lead.services)
-          ? lead.services.join(", ")
-          : "",
+  Array.isArray(lead.services)
+    ? lead.services.join(", ")
+    : "",
 
-        lead.requirements || "",
-        lead.conversationSummary || "",
+  lead.requirements || "",
+  lead.conversationSummary || "",
 
-        now,
+  now,
 
-        "🟢 New",
-        "",
-        "",
-        "",
-        "Website Chatbot",
+  "🟢 New",
+  "",
+  "",
+  "",
+  "Website Chatbot",
 
-"FALSE",
+  "FALSE",
 
-Array.isArray(lead.conversation)
-  ? lead.conversation
-      .map(
-  (m: any) =>
-    `${m.role === "user" ? "User" : "Assistant"}:\n${m.content}`
-)
-      .join("\n\n")
-  : "",
+  Array.isArray(lead.conversation)
+    ? lead.conversation
+        .map(
+          (m: any) =>
+            `${m.role === "user" ? "User" : "Assistant"}:\n${m.content}`
+        )
+        .join("\n\n")
+    : "",
+
+  uploadedImages
+  .map((img: any) => img.url)
+  .join("\n"),
 
 ];
 
@@ -188,7 +205,7 @@ Array.isArray(lead.conversation)
   await sheets.spreadsheets.values.append({
 
         spreadsheetId,
-        range: `${sheetName}!A:U`,
+        range: `${sheetName}!A:V`,
         valueInputOption: "USER_ENTERED",
 
         requestBody: {

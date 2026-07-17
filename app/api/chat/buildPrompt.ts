@@ -17,7 +17,11 @@ export function buildPrompt(
     eventType: string;
     guests: string;
     budget: string;
-  }
+  },
+  uploadedImages?: {
+    url: string;
+    filename: string;
+  }[]
 ) {
 
 
@@ -117,10 +121,26 @@ Budget: ${lead.budget || "Not collected"}
 `
   : "";
 
+
+  const imageContext = `
+Conversation Context:
+
+Uploaded Inspiration Images: ${uploadedImages?.length ?? 0}
+
+If the number above is greater than 0:
+
+• The uploaded inspiration images have already been received successfully.
+• They are attached to this enquiry.
+• The Virya Events planning team has access to them and will consider them while planning the event, preparing recommendations, selecting vendors and creating the quotation.
+• The customer may naturally refer to those uploaded images later in the conversation using contextual language such as "this", "that", "these", "those", or similar references.
+`;
+
   return `
 ${SYSTEM_PROMPT}
 
 ${leadContext}
+
+${imageContext}
 
 ${knowledge.join("\n\n")}
 `;

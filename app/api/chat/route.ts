@@ -125,6 +125,7 @@ export async function POST(req: Request) {
   lead,
   messages,
   field,
+  uploadedImages,
 }: {
   leadId: string;
   lead: {
@@ -142,6 +143,10 @@ export async function POST(req: Request) {
   };
   messages: ChatMessage[];
 field: string;
+uploadedImages: {
+  url: string;
+  filename: string;
+}[];
 } = await req.json();
 console.log("Lead received:", lead);
 
@@ -226,7 +231,8 @@ You can now ask me anything about your event.`,
 
 
 
-const systemPrompt = buildPrompt(`
+const systemPrompt = buildPrompt(
+  `
 Current Lead Information
 
 Name: ${lead.name}
@@ -242,20 +248,29 @@ Services: ${lead.services.join(", ")}
 
 Latest User Message:
 ${latestMessage}
-`);
-
+`,
+  {
+    eventType: lead.eventType,
+    guests: lead.guests,
+    budget: lead.budget,
+  },
+  uploadedImages
+);
     const chatCompletion = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       response_format: {
         type: "json_object",
       },
       messages: [
-        {
-          role: "system",
-          content: systemPrompt,
-        },
-        ...recentMessages,
-      ],
+  {
+    role: "system",
+    content: systemPrompt,
+  },
+  ...recentMessages.map((message) => ({
+    role: message.role,
+    content: message.content,
+  })),
+],
     });
 
     const rawResponse =
@@ -289,12 +304,13 @@ for (const [key, value] of Object.entries(aiLeadUpdate)) {
     console.log("Lead Update:", leadUpdate);
 
     return NextResponse.json({
-      reply,
-      leadId,
-      leadUpdate,
-      options: parsed.options || [],
-      mode: parsed.mode || "chat",
-    });
+  reply,
+  leadId,
+  leadUpdate,
+  conversationSummary,
+  options: parsed.options || [],
+  mode: parsed.mode || "chat",
+});
 
   } catch (error) {
 
