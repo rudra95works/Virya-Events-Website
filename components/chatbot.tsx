@@ -684,7 +684,15 @@ function resetConversation() {
   
 
   <a
-   href="https://wa.me/919731620695?text=Hi%20Virya%20Events,%20I'm%20interested%20in%20planning%20an%20event."
+  href={`https://wa.me/919731620695?text=${encodeURIComponent(
+`Hello Virya Events! 👋
+
+I'm interested in planning an event and would like to speak with one of your event planners.
+
+Reference ID: ${leadId || "Not Generated"}
+
+Looking forward to hearing from you.`
+  )}`}
   target="_blank"
   rel="noopener noreferrer"
   className="whatsapp-button"
@@ -748,7 +756,15 @@ function resetConversation() {
     </button>
 
     <a
-  href="https://wa.me/919731620695?text=Hi%20Virya%20Events,%20I'm%20interested%20in%20planning%20an%20event."
+  href={`https://wa.me/919731620695?text=${encodeURIComponent(
+`Hello Virya Events! 👋
+
+I'm interested in planning an event and would like to speak with one of your event planners.
+
+Reference ID: ${leadId || "Not Generated"}
+
+Looking forward to hearing from you.`
+  )}`}
   target="_blank"
   rel="noopener noreferrer"
   className="chat-menu-item"
