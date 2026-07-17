@@ -76,18 +76,25 @@ const [chatMode, setChatMode] = useState<"chat" | "question" | "completed">("cha
 
 const [currentQuestion, setCurrentQuestion] = useState("");
 const [currentField, setCurrentField] = useState("");
+const leadDetailsCompleted =
+  lead.name.trim() !== "" &&
+  /^\d{10}$/.test(lead.phone);
+
 const answeredQuestions = [
-  lead.eventType,
+  leadDetailsCompleted,
+  lead.eventType && lead.eventDate,
   lead.guests,
-  lead.budget,
-  lead.eventDate,
   lead.venue,
+  lead.budget,
   lead.services.length > 0,
 ].filter(Boolean).length;
 
 const totalQuestions = 6;
 
-const currentStep = Math.min(answeredQuestions + 1, totalQuestions);
+const currentStep =
+  answeredQuestions === 0
+    ? 1
+    : Math.min(answeredQuestions + 1, totalQuestions);
 
 const progressPercent =
   (answeredQuestions / totalQuestions) * 100;
@@ -738,7 +745,7 @@ function resetConversation() {
 
 </div>
 
-{chatMode === "question" && currentStep <= 6 && (
+{(showLeadForm || chatMode === "question") && currentStep <= 6 && (
   <div className="chat-progress-wrapper">
     <div className="chat-progress-text">
       Step {currentStep} of 6 • {Math.round(progressPercent)}% Complete

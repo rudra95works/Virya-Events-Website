@@ -15,15 +15,25 @@ const guidedFlow = [
     field: "eventType",
     question: "What type of event are you planning?",
     options: [
-  "Birthday",
-  "Wedding",
-  "Housewarming",
-  "Corporate Event",
-  "Engagement",
-  "Baby Shower",
-  "Anniversary",
-  "Others",
-],
+      "Birthday",
+      "Wedding",
+      "Housewarming",
+      "Corporate Event",
+      "Engagement",
+      "Baby Shower",
+      "Anniversary",
+      "Others",
+    ],
+  },
+  {
+    field: "eventDate",
+    question: "When is your event?",
+    options: [
+      "Within 7 days",
+      "This Month",
+      "Next Month",
+      "More than 1 Month Away",
+    ],
   },
   {
     field: "guests",
@@ -34,52 +44,41 @@ const guidedFlow = [
       "100–250",
       "250+",
     ],
-
   },
-    {
-  field: "budget",
-  question: "What's your approximate event budget?",
-  options: [
-    "Under ₹1 Lakh",
-    "₹1–3 Lakhs",
-    "₹3–5 Lakhs",
-    "₹5 Lakhs+",
-  ],
-},
-{
-  field: "eventDate",
-  question: "When is your event?",
-  options: [
-    "Within 7 days",
-    "This Month",
-    "Next Month",
-    "More than 1 Month Away",
-  ],
-},
-{
-  field: "venue",
-  question: "What kind of venue are you looking for?",
-  options: [
-    "I already have a venue",
-    "Need help finding one",
-    "Not decided yet",
-    "Virtual Event",
-  ],
-},
-{
-  field: "services",
-  question: "Which services are you interested in?",
-  options: [
-    "Decoration",
-    "Catering",
-    "Photography & Videography",
-    "DJ & Entertainment",
-    "Sound & Lighting",
-    "Invitation & RSVP",
-    "Makeup & Styling",
-    "Venue Assistance",
-  ],
-},
+  {
+    field: "venue",
+    question: "What kind of venue are you looking for?",
+    options: [
+      "I already have a venue",
+      "Need help finding one",
+      "Not decided yet",
+      "Virtual Event",
+    ],
+  },
+  {
+    field: "budget",
+    question: "What's your approximate event budget?",
+    options: [
+      "Under ₹1 Lakh",
+      "₹1–3 Lakhs",
+      "₹3–5 Lakhs",
+      "₹5 Lakhs+",
+    ],
+  },
+  {
+    field: "services",
+    question: "Which services are you interested in?",
+    options: [
+      "Decoration",
+      "Catering",
+      "Photography & Videography",
+      "DJ & Entertainment",
+      "Sound & Lighting",
+      "Invitation & RSVP",
+      "Makeup & Styling",
+      "Venue Assistance",
+    ],
+  },
 ];
 
 function getNextQuestion(lead: {

@@ -1216,7 +1216,7 @@ letter-spacing: 0.2px;
 .chat-footer{
   background:#fff;
   border-top:1px solid #ececec;
-  padding:16px 4px 14px 8px;
+  padding:8px 4px 10px 8px;
   flex-shrink:0;
 }
 
@@ -1252,10 +1252,10 @@ letter-spacing: 0.2px;
 ========================================================= */
 
 .chat-helper{
-  font-size:12px;
+  font-size:11px;
   color:#8A8F98;
-  line-height:1.4;
-  margin-bottom:8px;
+  line-height:1.3;
+  margin-bottom:4px;
   padding:0 4px;
 }
 
