@@ -684,7 +684,7 @@ function resetConversation() {
   
 
   <a
-  href="https://wa.me/91YOURNUMBER"
+   href="https://wa.me/919731620695?text=Hi%20Virya%20Events,%20I'm%20interested%20in%20planning%20an%20event."
   target="_blank"
   rel="noopener noreferrer"
   className="whatsapp-button"
@@ -721,25 +721,46 @@ function resetConversation() {
   </button>
 
   {showMenu && (
-    <div className="chat-menu">
+  <div className="chat-menu">
 
-      <button
-        className="chat-menu-item"
-        onClick={() => {
-          setShowMenu(false);
-          resetConversation();
-        }}
-      >
-        <strong>Planning another event?</strong>
+    <button
+      className="chat-menu-close"
+      onClick={() => setShowMenu(false)}
+      aria-label="Close menu"
+    >
+      ✕
+    </button>
 
-        <span>
-          Start fresh and plan a new celebration.
-        </span>
+    <button
+      className="chat-menu-item"
+      onClick={() => {
+        setShowMenu(false);
+        resetConversation();
+      }}
+    >
+      <strong>Planning another event?</strong>
 
-      </button>
+      <span>
+        Start fresh and plan a new celebration.
+      </span>
+    </button>
 
-    </div>
-  )}
+    <a
+  href="https://wa.me/919731620695?text=Hi%20Virya%20Events,%20I'm%20interested%20in%20planning%20an%20event."
+  target="_blank"
+  rel="noopener noreferrer"
+  className="chat-menu-item"
+  onClick={() => setShowMenu(false)}
+>
+  <strong>Chat on WhatsApp</strong>
+
+  <span>
+    Talk directly with a Virya Event Planner.
+  </span>
+</a>
+
+  </div>
+)}
 
 </div>
 
@@ -775,52 +796,86 @@ function resetConversation() {
 </p>
 
 
-<input
-  placeholder="Your Name *"
-        value={lead.name}
-        onChange={(e) =>
-          setLead({
-            ...lead,
-            name: e.target.value,
-          })
-        }
-      />
+<div className="form-group">
 
-      
+ <label htmlFor="lead-name">
+    Full Name <span className="required">*</span>
+</label>
 
-<input
-  type="tel"
-  inputMode="numeric"
-  maxLength={10}
-  placeholder="Phone Number *"
-  value={lead.phone}
-  onChange={(e) =>
-    setLead({
-      ...lead,
-      phone: e.target.value.replace(/\D/g, "").slice(0, 10),
-    })
-  }
-/>
-      
+  <input
+    id="lead-name"
+    type="text"
+    placeholder="Enter your full name"
+    value={lead.name}
+    onChange={(e) =>
+      setLead({
+        ...lead,
+        name: e.target.value,
+      })
+    }
+  />
 
-<input
-  placeholder="Email for Event Updates (Optional)"
-        value={lead.email}
-        onChange={(e) =>
-          setLead({
-            ...lead,
-            email: e.target.value,
-          })
-        }
-      />
+</div>
+
+<div className="form-group">
+
+  <label htmlFor="lead-phone">
+    Mobile Number <span className="required">*</span>
+</label>
+  <input
+    id="lead-phone"
+    type="tel"
+    inputMode="numeric"
+    maxLength={10}
+    placeholder="10-digit mobile number"
+    value={lead.phone}
+    onChange={(e) =>
+      setLead({
+        ...lead,
+        phone: e.target.value.replace(/\D/g, "").slice(0, 10),
+      })
+    }
+  />
+
+</div>
+
+<div className="form-group">
+
+  <label htmlFor="lead-email">
+  <span>Email Address</span>
+
+  <small className="optional">
+    Optional
+  </small>
+</label>
+
+  <input
+    id="lead-email"
+    type="email"
+    placeholder="your@email.com"
+    value={lead.email}
+    onChange={(e) =>
+      setLead({
+        ...lead,
+        email: e.target.value,
+      })
+    }
+  />
+
+</div>
 
       <button
   onClick={startConversation}
   disabled={startingChat}
 >
-  {startingChat
-  ? "Starting your planning session..."
-  : "Continue →"}
+  {startingChat ? (
+    "Starting your planning session..."
+  ) : (
+    <>
+      Continue
+      <span className="btn-arrow">→</span>
+    </>
+  )}
 </button>
 
     </div>
